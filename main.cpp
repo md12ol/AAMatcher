@@ -2,85 +2,92 @@
 #include "main.h"
 
 int main(int argc, char *argv[]) {
-    double tmp;
-    ofstream runStats, expStats;
+    double bestOfBest = (BIGGERBETTER ? 0 : MAXFLOAT);
+    string filename;
+    ofstream runStats, expStats, readMe;
+
+    vector<int> bests;
+    bests.reserve(runs);
+
     getArgs(argv);
     initAlg();
     cmdLineIntro(cout);
-    bool biggerBetter = true;
-    double bestOfBest = (biggerBetter ? 0.0 : MAXFLOAT);
-    expStats.open("./exp.dat", ios::out);
+    sprintf(pathToOut, "./AAMOut/AAMatch on Seq%d with %04dPop, %02dSta, %02dMut, %02dTsz/",
+            seqNum, popsize, sdaStates, maxMuts, tournSize);
+    filesystem::create_directory(pathToOut);
+    expStats.open(string(pathToOut) + "./exp.dat", ios::out);
+    readMe.open(string(pathToOut) + "./read.me", ios::out);
+    makeReadMe(readMe);
+    readMe.close();
 
+    double tmp;
     for (int run = 1; run < runs + 1; ++run) {
         initPop(run);
-        filename = "./run" + to_string(run) + ".dat";
+        filename = string(pathToOut) + "run" + to_string(run) + ".dat";
         runStats.open(filename, ios::out);
         printExpStatsHeader(cout);
         printExpStatsHeader(runStats);
-        report(runStats, run, 0, biggerBetter);
-        for (int gen = 1; gen <= generations; ++gen) {
-            matingEvent(biggerBetter);
-            if (gen % (int) (generations / REPORTS) == 0) {
-                report(runStats, run, (int) gen / (generations / REPORTS), biggerBetter);
+        report(runStats, run, 0, BIGGERBETTER);
+
+        int gen = 1;
+        int stallCount = 0;
+        double best = (BIGGERBETTER ? 0 : MAXFLOAT);
+        while (gen <= maxGens && stallCount < TERM_CRIT) {
+            matingEvent(BIGGERBETTER);
+
+            if (gen % REPORT_EVERY == 0) {
+                tmp = report(runStats, run, (int) gen / (REPORT_EVERY), BIGGERBETTER);
+                if ((BIGGERBETTER && tmp > best) || (!BIGGERBETTER && tmp < best)) {
+                    best = tmp;
+                    stallCount = 0;
+                } else {
+                    stallCount++;
+                }
             }
-            if (gen % (int) (generations / CULLINGS) == 0) {
-                culling(0.25);
+
+            if (gen % (int) (CULLING_EVERY * REPORT_EVERY) == 0) {
+                culling(CULLING_ODDS, RANDOM_CULLING, BIGGERBETTER);
             }
+            gen++;
         }
+
         tmp = finalReport(expStats, true);
-        if ((biggerBetter && tmp > bestOfBest) || (!biggerBetter && tmp < bestOfBest)) {
+        if ((BIGGERBETTER && tmp > bestOfBest) || (!BIGGERBETTER && tmp < bestOfBest)) {
             bestOfBest = tmp;
         }
+        bests.push_back(tmp);
         runStats.close();
     }
 
-    cout << "BEST OF BEST: " << bestOfBest << endl;
+    vector<double> stats = calcStats2(bests, BIGGERBETTER);
+    cout << "BEST OF BEST: " << bestOfBest << " of " << seqLen << endl;
+    cout << "Fitness for Exp: " << stats[0] << " +- " << stats[2] << endl;
     delete[] pop;
-    cout << "Program Completed Successfully!" << std::endl;
+    cout << "Program Completed Successfully!" << endl;
     return 0;
 }
 
-int culling(double percentage) {
+int culling(double percentage, bool rndPick, bool biggerBetter) {
     int numKillings = (int) (popsize * percentage);
-    vector<int> contestants = tournSelect(popsize, false);
+    vector<int> contestants;
     vector<int> winners;
+    winners.reserve(numKillings);
+
+    if (rndPick) {
+        contestants = tournSelect(numKillings, !biggerBetter);
+    } else {
+        contestants = tournSelect(popsize, !biggerBetter);
+    }
+
     for (int idx = 0; idx < numKillings; idx++) {
         winners.push_back(contestants[idx]);
     }
+
     for (int idx: winners) {
         pop[idx].randomize();
         fits[idx] = fitness(pop[idx]);
     }
-    return 0;
-}
 
-int generateTestSeq() {
-    char letter;
-    string thing = "ATGGGACGCAAGGACGAGCAGAAGCAAACGAGCGCCACAAGCACGCCGGGGCAGGGG";
-    seqLen = (int) thing.size();
-    for (int i = 0; i < seqLen; i++) {
-        letter = thing[i];
-        if (letter == 'G') {
-            testSeq.push_back(0);
-        } else if (letter == 'C') {
-            testSeq.push_back(1);
-        } else if (letter == 'A') {
-            testSeq.push_back(2);
-        } else if (letter == 'T') {
-            testSeq.push_back(3);
-        }
-    }
-    return 0;
-}
-
-int initPop(int run) {
-    cout << "Beginning Run " << run << " of " << runs << endl;
-    fits.clear();
-    for (int idx = 0; idx < popsize; ++idx) {
-        pop[idx].randomize();
-        fits.push_back(fitness(pop[idx]));
-    }
-    cout << "Population Generated!" << endl;
     return 0;
 }
 
@@ -103,6 +110,7 @@ vector<int> tournSelect(int size, bool decreasing) {
     vector<int> tournIdxs;
     int idxToAdd;
 
+    tournIdxs.reserve(size);
     if (size == popsize) {
         for (int idx = 0; idx < size; idx++) {
             tournIdxs.push_back(idx);
@@ -168,7 +176,28 @@ vector<double> calcStats(bool biggerBetter) {
     return {mean, stdDev, CI95, (double) bestVal}; // {mean, stdDev, 95CI, best}
 }
 
-int report(ofstream &outp, int run, int rptNum, bool biggerBetter) {
+vector<double> calcStats2(vector<int> vals, bool biggerBetter) {
+    double sum = 0.0;
+    double bestVal = (biggerBetter ? 0.0 : MAXFLOAT);
+
+    for (int val: vals) {
+        sum += val;
+        if ((biggerBetter && val > bestVal) || (!biggerBetter && val < bestVal)) {
+            bestVal = val;
+        }
+    }
+    double mean = sum / (double) vals.size();
+    double stdDevSum = 0.0;
+    for (int val: vals) {
+        stdDevSum += pow((double) val - mean, 2);
+    }
+    double stdDev = sqrt(stdDevSum / ((double) vals.size() - 1.0));
+    double CI95 = 1.96 * (stdDev / sqrt(vals.size()));
+
+    return {mean, stdDev, CI95, bestVal}; // {mean, stdDev, 95CI, best}
+}
+
+double report(ofstream &outp, int run, int rptNum, bool biggerBetter) {
     vector<double> stats = calcStats(biggerBetter); // {mean, stdDev, 95CI, best}
     multiStream printAndSave(cout, outp);
 
@@ -180,7 +209,7 @@ int report(ofstream &outp, int run, int rptNum, bool biggerBetter) {
     printAndSave << left << setw(8) << stats[3];
     printAndSave << left << setw(8) << (stats[3] / seqLen) * 100 << "%";
     printAndSave << "\n";
-    return 0;
+    return stats[3];
 }
 
 double finalReport(ostream &outp, bool biggerBetter) {
@@ -194,9 +223,6 @@ double finalReport(ostream &outp, bool biggerBetter) {
 
     multiStream printAndSave(cout, outp);
     printAndSave << "The best fitness is " << fits[bestIdx] << "\n";
-    printAndSave << left << setw(20) << "Desired Sequence: ";
-    printVector<multiStream, int>(printAndSave, testSeq, "", "", false);
-    printAndSave << "\n";
     vector<int> bestSeq = pop[bestIdx].getBitsVec(seqLen);
     printAndSave << left << setw(20) << "Best Match: ";
     printVector<multiStream, int>(printAndSave, bestSeq, "", "", false);
@@ -210,6 +236,12 @@ double finalReport(ostream &outp, bool biggerBetter) {
         }
     }
     printAndSave << "\n";
+    printAndSave << left << setw(20) << "Desired Sequence: ";
+    printVector<multiStream, int>(printAndSave, testSeq, "", "", false);
+    printAndSave << "\n";
+
+    outp << "SDA" << endl;
+    pop[bestIdx].print(outp);
 
     sort(fits.begin(), fits.end());
     if (biggerBetter) {
