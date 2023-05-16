@@ -12,20 +12,21 @@
 
 using namespace std;
 
-class Bitsprayer {
+class SDA {
 public:
-    Bitsprayer();           //creates an unallocated bitspray
-    explicit Bitsprayer(int states, int numChars);      //create a bitspray with buffer S states
-    Bitsprayer(Bitsprayer &other);  //copy constructor
-    ~Bitsprayer();                //destructor
+    SDA();           //creates an unallocated bitspray
+    explicit SDA(int states, int numChars);      //create a bitspray with buffer S states
+    SDA(SDA &other);  //copy constructor
+    ~SDA();                //destructor
 
     int create(int states);
     int randomize();
-    int copy(Bitsprayer &other);
+    int copy(SDA &other);
     int print();
     int print(ostream &aus);
     static int destroy();
-    int twoPtCrossover(Bitsprayer &other);
+    int twoPtCrossover(SDA &other);
+    int oneStateCrossover(SDA &other);
     int mutate(int numMuts);
     vector<int> getBitsVec(int len);
     int printBitsVec(int len, ostream &aus);

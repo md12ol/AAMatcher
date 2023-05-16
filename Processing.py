@@ -162,6 +162,19 @@ def str_to_list(orig: str):
         pass
     return rtn
 
+
+def cmpr(seq1, seq2):
+    similar_str = ''
+    for idx in range(len(seq2)):
+        if seq1[idx] == seq2[idx]:
+            similar_str += 'X'
+        else:
+            similar_str += '-'
+            pass
+        pass
+    return similar_str
+
+
 def print_best_info(path: str, info: str, dat: [], true_seq: []):
     with open(path, "w") as f:
         f.write(info + "\n")
@@ -182,6 +195,18 @@ def print_best_info(path: str, info: str, dat: [], true_seq: []):
         f.writelines(dat[2])
         pass
     pass
+
+
+def get_char_freqs(sequences: [], num_chars: int):
+    freqs = [['G', 'C', 'A', 'T']]
+    for seq in sequences:
+        dat = [0 for _ in range(num_chars)]
+        for c in seq:
+            dat[c] += 1
+            pass
+        freqs.append(dat)
+        pass
+    return freqs
 
 
 def gen_sequences(path: str):
@@ -243,9 +268,9 @@ def main():
     print("START")
     folder_names = os.listdir(inp)
     seq_idxs = [0, 1, 2, 3, 4, 5]
-    seq_idxs = [1, 2, 3, 4]
+    # seq_idxs = [1, 2, 3, 4]
     popsizes = [500, 5000]
-    num_states = [5, 20]
+    num_states = [5, 20, 50]
     max_muts = [1, 3, 10]
     tourn_sizes = [5, 15]
     sequences = gen_sequences("./Sequences.dat")
@@ -254,8 +279,12 @@ def main():
         print(len(sequences[idx]))
         print(int_to_DNA(sequences[idx]))
         pass
-    return 0
 
+    freq_data = get_char_freqs(sequences, 4)
+    for dat in freq_data[1:]:
+        print(freq_data[0])
+        print(dat)
+        pass
 
     exp_dat = []
     exp_lbls = []
@@ -370,7 +399,7 @@ def main():
                 best_of_best_exp = didx
             pass
         make_table(mode_stats[sidx], best_runs, exp_descriptions, outp +
-                   "Seq" + str(seq) + "table" + ".dat", True)
+                   "Seq" + str(seq) + "table" + ".dat", False)
         info = "Best for Sequence " + str(seq) + " is " + \
                "EXP" + str(best_of_best_exp + 1) + ": " + str(exp_descriptions[best_of_best_exp])
         print_best_info(outp + "Seq" + str(seq) + "_best.dat", info,

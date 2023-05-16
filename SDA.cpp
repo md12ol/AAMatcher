@@ -1,8 +1,8 @@
-#include "Bitsprayer.h"
+#include "SDA.h"
 
 #define VERBOSEBIT false
 
-Bitsprayer::Bitsprayer() {
+SDA::SDA() {
     initInput = -1;
     numStates = -1;
     initState = -1;
@@ -10,10 +10,10 @@ Bitsprayer::Bitsprayer() {
 //    transitions = {{}};
 //    responses = {{{}}};
 //    zeroProb = -1;
-    if (VERBOSEBIT) cout << "Bitsprayer Made" << endl;
+    if (VERBOSEBIT) cout << "SDA Made" << endl;
 }
 
-Bitsprayer::Bitsprayer(int states, int numChars) {
+SDA::SDA(int states, int numChars) {
     initInput = -1;
     numStates = states;
     initState = -1;
@@ -32,24 +32,24 @@ Bitsprayer::Bitsprayer(int states, int numChars) {
 
 //    transitions = {{}};
 //    responses = {{{}}};
-    if (VERBOSEBIT) cout << "Bitsprayer Made w " << states << " states" << endl;
+    if (VERBOSEBIT) cout << "SDA Made w " << states << " states" << endl;
 }
 
-Bitsprayer::Bitsprayer(Bitsprayer &other) {
+SDA::SDA(SDA &other) {
     copy(other);
 }
 
-Bitsprayer::~Bitsprayer() {
+SDA::~SDA() {
     destroy();
 }
 
-int Bitsprayer::create(int states) {
+int SDA::create(int states) {
     numStates = states;
     randomize();
     return 0;
 }
 
-int Bitsprayer::randomize() {
+int SDA::randomize() {
     initInput = (int) lrand48() % numChars;
     if (initInput < 0) {
         cout << "ERROR! initInput is negative!" << endl;
@@ -92,7 +92,7 @@ int Bitsprayer::randomize() {
     return 0;
 }
 
-int Bitsprayer::copy(Bitsprayer &other) {
+int SDA::copy(SDA &other) {
     initInput = other.initInput;
     numStates = other.numStates;
     initState = other.initState;
@@ -102,16 +102,16 @@ int Bitsprayer::copy(Bitsprayer &other) {
 
     transitions = other.transitions;
     responses = other.responses;
-    if (VERBOSEBIT) cout << "Bitsprayer Copied" << endl;
+    if (VERBOSEBIT) cout << "SDA Copied" << endl;
     return 0;
 }
 
-int Bitsprayer::print() {
+int SDA::print() {
     print(cout);
     return 0;
 }
 
-int Bitsprayer::print(ostream &aus) {
+int SDA::print(ostream &aus) {
     aus << initState << " <- " << initInput << endl;
     for (int s = 0; s < numStates; ++s) {
         if (transitions[s].size() > numChars) {
@@ -137,15 +137,15 @@ int Bitsprayer::print(ostream &aus) {
     if (responses.size() > numStates) {
         aus << "ERROR!  More responses than the number of states!" << endl;
     }
-    if (VERBOSEBIT) cout << "Bitsprayer Printed" << endl;
+    if (VERBOSEBIT) cout << "SDA Printed" << endl;
     return 0;
 }
 
-int Bitsprayer::destroy() {
+int SDA::destroy() {
     return 0;
 }
 
-int Bitsprayer::twoPtCrossover(Bitsprayer &other) {
+int SDA::twoPtCrossover(SDA &other) {
     int cp1, cp2;
     int swapInt;
     vector<int> swapVec;
@@ -184,7 +184,29 @@ int Bitsprayer::twoPtCrossover(Bitsprayer &other) {
     return 0;
 }
 
-int Bitsprayer::mutate(int numMuts) {
+int SDA::oneStateCrossover(SDA &other){
+    int state, swapInt;
+    vector<int> swapVec;
+
+    if (numStates != other.numStates) {
+        return 1;
+    }
+
+    state = (int) lrand48() % numStates;
+    if (state == 0) {
+        swapInt = initInput;
+        initInput = other.initInput;
+        other.initInput = swapInt;
+    }
+
+    swapVec = transitions.at(state);
+    transitions.at(state) = other.transitions.at(state);
+    other.transitions.at(state) = swapVec;
+
+    return 0;
+}
+
+int SDA::mutate(int numMuts) {
     int mutPt;
     vector<int> oneResponse;
     int respSize;
@@ -212,7 +234,7 @@ int Bitsprayer::mutate(int numMuts) {
     return 0;
 }
 
-vector<int> Bitsprayer::getBitsVec(int len) {
+vector<int> SDA::getBitsVec(int len) {
     vector<int> rtn;
     rtn.clear();
     int nextBit;
@@ -234,7 +256,7 @@ vector<int> Bitsprayer::getBitsVec(int len) {
     return rtn;
 }
 
-int Bitsprayer::printBitsVec(int len, ostream &aus) {
+int SDA::printBitsVec(int len, ostream &aus) {
     vector<int> vec = getBitsVec(len);
     for (int i: vec) {
         aus << i << " ";
@@ -242,24 +264,3 @@ int Bitsprayer::printBitsVec(int len, ostream &aus) {
     aus << endl;
     return 0;
 }
-
-//int main() {
-//    Bitsprayer b(5);
-//    b.create(5);
-//    b.randomize();
-//    b.print();
-//
-////    Bitsprayer b2(5);
-////    b2.create(5);
-////    b2.randomize();
-////    b2.print();
-////
-////    b.twoPtCrossover(b2);
-////    b.print();
-////    b2.print();
-//
-//    printVec(b.getBitsVec(20));
-//
-//    if (VERBOSEBIT) cout << "DONE!" << endl;
-//    return 0;
-//}
