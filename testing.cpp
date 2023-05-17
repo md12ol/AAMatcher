@@ -49,8 +49,8 @@ int main(int argc, char *argv[]) {
     getArgs(argv);
     initAlg();
     cmdLineIntro(cout);
-    sprintf(pathToOut, "./AAMOut/AAMatchTest on Seq%d with %04dPop, %02dSta, %02dMut, %02dTsz/",
-            seqNum, popsize, sdaStates, maxMuts, tournSize);
+    sprintf(pathToOut, "./AAMOut/AAMatchTest on Seq%d with %04dPop, %02dSta, %02dMut, %02dTsz, %dCross/",
+            seqNum, popsize, sdaStates, maxMuts, tournSize, crossOp);
     filesystem::create_directory(pathToOut);
     expStats.open(string(pathToOut) + "./exp.dat", ios::out);
     readMe.open(string(pathToOut) + "./read.me", ios::out);
