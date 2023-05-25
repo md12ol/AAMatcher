@@ -17,7 +17,7 @@ vector<int> runMultiMating(int numEvents, SDA mom, SDA dad) {
     return fitVals;
 }
 
-int crossoverCheck(ofstream& outp){
+int crossoverCheck(ofstream &outp) {
     outp << "Population Fitness Values:" << endl;
 
     for (int i = 0; i < popsize; ++i) {
@@ -37,21 +37,25 @@ int crossoverCheck(ofstream& outp){
 }
 
 int main(int argc, char *argv[]) {
-    double expBestFit = (BIGGERBETTER ? 0 : MAXFLOAT);
-    SDA expBestSDA = SDA(sdaStates, numChars);
+    getArgs(argv);
+    string pathToSeqs = "./Sequences.dat";
+    initAlg(pathToSeqs);
 
-    char filename[100];
+    char filename[200];
     ofstream runStats, expStats, readMe, crossStart, crossEnd;
+
+    double expBestFit = (BIGGERBETTER ? 0 : MAXFLOAT);
+    SDA expBestSDA = SDA(sdaStates, numChars, 2, seqLen);
+
 
     vector<double> bests;
     bests.reserve(runs);
 
-    getArgs(argv);
-    initAlg();
+
     cmdLineIntro(cout);
-    sprintf(pathToOut, "./AAMOut/AAMatchTest on Seq%d with %04dPop, %02dSta, %02dMut, %02dTsz, %dCross/",
-            seqNum, popsize, sdaStates, maxMuts, tournSize, crossOp);
-    filesystem::create_directory(pathToOut);
+    sprintf(pathToOut, "./AAMOut/AAMatchTest on Seq%d with %04dPop, %02dSta, %02dMut, %02dTsz, %dCross/", seqNum,
+            popsize, sdaStates, maxMuts, tournSize, crossOp);
+    mkdir(pathToOut, 0777);
     expStats.open(string(pathToOut) + "./exp.dat", ios::out);
     readMe.open(string(pathToOut) + "./read.me", ios::out);
     makeReadMe(readMe);
@@ -64,7 +68,7 @@ int main(int argc, char *argv[]) {
         crossStart.open(filename, ios::out);
         crossoverCheck(crossStart);
         crossStart.close();
-        cout<<"Crossover Check Start Complete!"<<endl;
+        cout << "Crossover Check Start Complete!" << endl;
 
         sprintf(filename, "%srun%02d.dat", pathToOut, run);
         runStats.open(filename, ios::out);
@@ -105,7 +109,7 @@ int main(int argc, char *argv[]) {
         crossEnd.open(filename, ios::out);
         crossoverCheck(crossEnd);
         crossEnd.close();
-        cout<<"Crossover Check End Complete!"<<endl;
+        cout << "Crossover Check End Complete!" << endl;
     }
 
     ofstream best;

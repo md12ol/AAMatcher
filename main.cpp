@@ -1,22 +1,41 @@
 #include <iostream>
 #include "main.h"
 
+/**
+ * This method...
+ *
+ * Input variables:
+ * 1.   Population size
+ * 2.   Number of characters (in SDA)
+ * 3.   Number of states
+ * 4.   Seed
+ * 5.   Number of runs
+ * 6.   Maximum number of mating events
+ * 7.   Maximum number of mutations
+ * 8.   Sequence number
+ * 9.   Tournament size
+ * 10.  Crossover operator
+ *
+ * @param argc
+ * @param argv
+ * @return
+ */
 int main(int argc, char *argv[]) {
-    double expBestFit = (BIGGERBETTER ? 0 : MAXFLOAT);
-    SDA expBestSDA = SDA(sdaStates, numChars);
-
+    getArgs(argv);
+    string pathToSeqs = "./Sequences.dat";
     string filename;
     ofstream runStats, expStats, readMe;
 
     vector<double> bests;
     bests.reserve(runs);
+    double expBestFit = (BIGGERBETTER ? 0 : MAXFLOAT);
+    SDA expBestSDA = SDA(sdaStates, numChars, 2, seqLen);
 
-    getArgs(argv);
-    initAlg();
+    initAlg(pathToSeqs);
     cmdLineIntro(cout);
-    sprintf(pathToOut, "./AAMOut/AAMatch on Seq%d with %04dPop, %02dSta, %02dMut, %02dTsz, %dCross/",
-            seqNum, popsize, sdaStates, maxMuts, tournSize, crossOp);
-    filesystem::create_directory(pathToOut);
+    sprintf(pathToOut, "./AAMOut/AAMatch on Seq%d with %04dPop, %02dSta, %02dMut, %02dTsz, %dCross/", seqNum, popsize,
+            sdaStates, maxMuts, tournSize, crossOp);
+    mkdir(pathToOut, 0777);
     expStats.open(string(pathToOut) + "./exp.dat", ios::out);
     readMe.open(string(pathToOut) + "./read.me", ios::out);
     makeReadMe(readMe);
