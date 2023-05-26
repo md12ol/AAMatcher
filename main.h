@@ -513,6 +513,7 @@ int expReport(ostream &outp, vector<double> bestFits, SDA bestSDA, bool biggerBe
     vector<double> stats = calcStats<double>(bestFits, BIGGERBETTER);
     multiStream printAndSave(cout, outp);
     printAndSave << "Experiment Report:" << "\n";
+    printAndSave << "Best Run: " << bestIdx + 1 << "\n";
     printAndSave << "Best Fitness: " << bestFits[bestIdx] << " of " << seqLen << "\n";
     printAndSave << "Fitness 95% CI: " << stats[0] << " +- " << stats[2] << "\n";
     printAndSave << "\n";
@@ -525,7 +526,7 @@ int expReport(ostream &outp, vector<double> bestFits, SDA bestSDA, bool biggerBe
     printAndSave << left << setw(20) << "Desired Sequence: ";
     intToChar(goalSeq, charSeq);
     printVector<multiStream, char>(printAndSave, charSeq, "", "", true);
-    printAndSave << "\nSDA:";
+    printAndSave << "\nSDA:\n";
     bestSDA.printSDA(cout);
     bestSDA.printSDA(outp);
     return 0;
