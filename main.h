@@ -9,12 +9,10 @@
 using namespace std;
 
 // System Parameters
-#define REPORT_EVERY 10000
+#define REPORT_EVERY (int)10000
 #define TERM_CRIT 50
-#define CULLING_EVERY 4
-#define CULLING_ODDS 0.25
-#define RANDOM_CULLING false
-#define BIGGERBETTER true
+#define CULLING_EVERY 1
+#define BIGGER_BETTER (bool)true
 
 // Experiment Parameters
 int popsize;
@@ -27,7 +25,12 @@ int maxGens;
 int maxMuts;
 int tournSize;
 int seqNum;
-int crossOp;
+int crossoverOp;
+double crossoverRate;
+double mutationRate;
+double cullingRate;
+bool randomCulling;
+int bestIdx;
 
 vector<int> goalSeq;
 vector<int> testSeq;
@@ -37,11 +40,10 @@ int seqLen;
 SDA *pop;
 vector<double> fits;
 
-
 char pathToOut[150];
 
 // Program Method Declarations:
-int getArgs(char *args[]);
+int getArgs(char *arguments[]);
 int initAlg(const string &pathToSeqs);
 vector<vector<int>> getSequences(const string &pathToSeqs);
 int cmdLineIntro(ostream &outp);
@@ -91,140 +93,41 @@ private:
 /**
  * This method collects the command line arguments and places them in the respective variable.
  *
- * @param args popsize, numChars, sdaStates, seed, runs, maxGens, maxMuts, seqNum, tournSize, crossOp
+ * @param arguments popsize, numChars, sdaStates, seed, runs, maxGens, maxMuts, seqNum, tournSize, crossoverOp,
+ *                  crossoverRate, mutationRate, cullingRate, randomCulling
  * @return
  */
-int getArgs(char *args[]) {
-    string arg = args[1]; // popsize
-    try {
-        size_t pos;
-        popsize = std::stoi(arg, &pos);
-        if (pos < arg.size()) {
-            std::cerr << "Trailing characters after number: " << arg << endl;
-        }
-    } catch (std::invalid_argument const &ex) {
-        std::cerr << "Invalid number: " << arg << '\n';
-    } catch (std::out_of_range const &ex) {
-        std::cerr << "Number out of range: " << arg << '\n';
-    }
-
-    arg = args[2]; // numChars
-    try {
-        size_t pos;
-        numChars = std::stoi(arg, &pos);
-        if (pos < arg.size()) {
-            std::cerr << "Trailing characters after number: " << arg << endl;
-        }
-    } catch (std::invalid_argument const &ex) {
-        std::cerr << "Invalid number: " << arg << '\n';
-    } catch (std::out_of_range const &ex) {
-        std::cerr << "Number out of range: " << arg << '\n';
-    }
-
-    arg = args[3]; // sdaStates
-    try {
-        size_t pos;
-        sdaStates = std::stoi(arg, &pos);
-        if (pos < arg.size()) {
-            std::cerr << "Trailing characters after number: " << arg << endl;
-        }
-    } catch (std::invalid_argument const &ex) {
-        std::cerr << "Invalid number: " << arg << '\n';
-    } catch (std::out_of_range const &ex) {
-        std::cerr << "Number out of range: " << arg << '\n';
-    }
-
-    arg = args[4]; // seed
-    try {
-        size_t pos;
-        seed = std::stoi(arg, &pos);
-        if (pos < arg.size()) {
-            std::cerr << "Trailing characters after number: " << arg << endl;
-        }
-    } catch (std::invalid_argument const &ex) {
-        std::cerr << "Invalid number: " << arg << '\n';
-    } catch (std::out_of_range const &ex) {
-        std::cerr << "Number out of range: " << arg << '\n';
-    }
-
-    arg = args[5]; // runs
-    try {
-        size_t pos;
-        runs = std::stoi(arg, &pos);
-        if (pos < arg.size()) {
-            std::cerr << "Trailing characters after number: " << arg << endl;
-        }
-    } catch (std::invalid_argument const &ex) {
-        std::cerr << "Invalid number: " << arg << '\n';
-    } catch (std::out_of_range const &ex) {
-        std::cerr << "Number out of range: " << arg << '\n';
-    }
-
-    arg = args[6]; // maxGens
-    try {
-        size_t pos;
-        maxGens = std::stoi(arg, &pos);
-        if (pos < arg.size()) {
-            std::cerr << "Trailing characters after number: " << arg << endl;
-        }
-    } catch (std::invalid_argument const &ex) {
-        std::cerr << "Invalid number: " << arg << '\n';
-    } catch (std::out_of_range const &ex) {
-        std::cerr << "Number out of range: " << arg << '\n';
-    }
-
-    arg = args[7]; // maxMuts
-    try {
-        size_t pos;
-        maxMuts = std::stoi(arg, &pos);
-        if (pos < arg.size()) {
-            std::cerr << "Trailing characters after number: " << arg << endl;
-        }
-    } catch (std::invalid_argument const &ex) {
-        std::cerr << "Invalid number: " << arg << '\n';
-    } catch (std::out_of_range const &ex) {
-        std::cerr << "Number out of range: " << arg << '\n';
-    }
-
-    arg = args[8]; // seqNum
-    try {
-        size_t pos;
-        seqNum = std::stoi(arg, &pos);
-        if (pos < arg.size()) {
-            std::cerr << "Trailing characters after number: " << arg << endl;
-        }
-    } catch (std::invalid_argument const &ex) {
-        std::cerr << "Invalid number: " << arg << '\n';
-    } catch (std::out_of_range const &ex) {
-        std::cerr << "Number out of range: " << arg << '\n';
-    }
-
-    arg = args[9]; // tournSize
-    try {
-        size_t pos;
-        tournSize = std::stoi(arg, &pos);
-        if (pos < arg.size()) {
-            std::cerr << "Trailing characters after number: " << arg << endl;
-        }
-    } catch (std::invalid_argument const &ex) {
-        std::cerr << "Invalid number: " << arg << '\n';
-    } catch (std::out_of_range const &ex) {
-        std::cerr << "Number out of range: " << arg << '\n';
-    }
-
-    arg = args[10]; // crossOp
-    try {
-        size_t pos;
-        crossOp = std::stoi(arg, &pos);
-        if (pos < arg.size()) {
-            std::cerr << "Trailing characters after number: " << arg << endl;
-        }
-    } catch (std::invalid_argument const &ex) {
-        std::cerr << "Invalid number: " << arg << '\n';
-    } catch (std::out_of_range const &ex) {
-        std::cerr << "Number out of range: " << arg << '\n';
-    }
-
+int getArgs(char *arguments[]) {
+    size_t pos;
+    string arg;
+    arg = arguments[1]; // popsize
+    popsize = stoi(arg, &pos);
+    arg = arguments[2]; // numChars
+    numChars = stoi(arg, &pos);
+    arg = arguments[3]; // sdaStates
+    sdaStates = stoi(arg, &pos);
+    arg = arguments[4]; // seed
+    seed = stoi(arg, &pos);
+    arg = arguments[5]; // runs
+    runs = stoi(arg, &pos);
+    arg = arguments[6]; // maxGens
+    maxGens = stoi(arg, &pos);
+    arg = arguments[7]; // maxMuts
+    maxMuts = stoi(arg, &pos);
+    arg = arguments[8]; // seqNum
+    seqNum = stoi(arg, &pos);
+    arg = arguments[9]; // tournSize
+    tournSize = stoi(arg, &pos);
+    arg = arguments[10]; // crossoverOp
+    crossoverOp = stoi(arg, &pos);
+    arg = arguments[11]; // crossoverRate
+    crossoverRate = stod(arg, &pos);
+    arg = arguments[12]; // mutationRate
+    mutationRate = stod(arg, &pos);
+    arg = arguments[13]; // cullingRate
+    cullingRate = stod(arg, &pos);
+    arg = arguments[14]; // randomCulling
+    randomCulling = stoi(arg, &pos) == 1;
     cout << "Arguments Captured!" << endl;
     return 0;
 }
@@ -268,7 +171,7 @@ vector<vector<int>> getSequences(const string &pathToSeqs) {
 }
 
 int cmdLineIntro(ostream &outp) {
-    outp << "Amino Acid Sequence Matcher." << endl;
+    outp << "Amino Acid/DNA Sequence Matcher." << endl;
     outp << "Fitness Function: Naive." << endl;
     outp << "Matching Sequence (length " << seqLen << "): ";
     intToChar(goalSeq, charSeq);
@@ -286,15 +189,18 @@ int makeReadMe(ostream &outp) {
     outp << "Alphabet Size: " << numChars << endl;
     outp << "Max Generations: " << maxGens << endl;
     outp << "Report Every: " << REPORT_EVERY << " generations" << endl;
-    outp << "Termination Criteria: maximum fitness or no improvement for " << TERM_CRIT * REPORT_EVERY << " maxGens"
-         << endl;
-    outp << "Maximum Number of Mutations: " << maxMuts << endl;
+    outp << "Termination Criteria: maximum fitness or no improvement for " << TERM_CRIT * REPORT_EVERY
+         << " generations" << endl;
     outp << "Tournament Size: " << tournSize << endl;
+    outp << "Crossover Operator: " << (crossoverOp == 0 ? "Two-Point Crossover" : "One-State Crossover") << endl;
+    outp << "Crossover Rate: " << (int) (crossoverRate * 100) << "%" << endl;
+    outp << "Maximum Number of Mutations: " << maxMuts << endl;
+    outp << "Mutation Rate: " << (int) (mutationRate * 100) << "%" << endl;
     outp << "Culling Every: " << CULLING_EVERY * REPORT_EVERY << " generations" << endl;
-    if (RANDOM_CULLING) {
-        outp << "Culling Winners: random " << (int) (CULLING_ODDS * 100) << "% of the population" << endl;
+    if (randomCulling) {
+        outp << "Culling Winners: Random " << (int) (cullingRate * 100) << "% of the population" << endl;
     } else {
-        outp << "Culling Winners: worst " << (int) (CULLING_ODDS * 100) << "% of the population" << endl;
+        outp << "Culling Winners: Worst " << (int) (cullingRate * 100) << "% of the population" << endl;
     }
     return 0;
 }
@@ -355,12 +261,16 @@ vector<double> calcStats(vector<T> vals, bool biggerBetter) {
     double sum = 0.0;
     double bestVal = (biggerBetter ? 0.0 : MAXFLOAT);
 
-    for (T val: vals) {
+    int val;
+    for (int idx = 0; idx < vals.size(); ++idx) {
+        val = vals[idx];
         sum += val;
         if ((biggerBetter && val > bestVal) || (!biggerBetter && val < bestVal)) {
             bestVal = val;
+            bestIdx = idx;
         }
     }
+
     double mean = sum / (double) vals.size();
     double stdDevSum = 0.0;
     for (int val: vals) {
@@ -377,14 +287,15 @@ int matingEvent(bool biggerBetter) {
     SDA child1, child2;
 
     vector<int> idxs = tournSelect(tournSize, biggerBetter);
-//    printIdxsOfVector<double>(fits, idxs, "Tournament Fitness Values: ", "\t", true);
 
     child1.copy(pop[idxs[0]]);
     child2.copy(pop[idxs[1]]);
-    if (crossOp == 0) child1.twoPtCrossover(child2);
-    else if (crossOp == 1) child1.oneStateCrossover(child2);
+    if (drand48() < crossoverRate) {
+        if (crossoverOp == 0) child1.twoPtCrossover(child2);
+        else if (crossoverOp == 1) child1.oneStateCrossover(child2);
+    }
 
-    if (maxMuts > 0) {
+    if (drand48() < mutationRate && maxMuts > 0) {
         numMuts = (int) lrand48() % maxMuts + 1;
         child1.mutate(numMuts);
         numMuts = (int) lrand48() % maxMuts + 1;
@@ -414,7 +325,7 @@ vector<int> tournSelect(int size, bool decreasing) {
             if (count(tournIdxs.begin(), tournIdxs.end(), idxToAdd) == 0) {
                 tournIdxs.push_back(idxToAdd);
             }
-        } while (tournIdxs.size() < tournSize);
+        } while (tournIdxs.size() < size);
     }
 
     sort(tournIdxs.begin(), tournIdxs.end(), compareFitness);
@@ -429,26 +340,33 @@ bool compareFitness(int popIdx1, int popIdx2) {
 }
 
 int culling(double percentage, bool rndPick, bool biggerBetter) {
+    if (percentage == 1) { // Cull all but the best SDA
+        pop[0].copy(pop[bestIdx]);
+        fits[0] = fitness(pop[0]);
+        for (int idx = 1; idx < popsize; ++idx) {
+            pop[idx].randomize();
+            fits[idx] = fitness(pop[idx]);
+        }
+        return 0;
+    }
+
+    // Otherwise, cull percentage% of the population
     int numKillings = (int) (popsize * percentage);
     vector<int> contestants;
-    vector<int> winners;
-    winners.reserve(numKillings);
-
-    if (rndPick) {
+    if (rndPick) { // Cull random percentage% of the population
+        contestants.reserve(numKillings);
         contestants = tournSelect(numKillings, !biggerBetter);
-    } else {
+    } else { // Cull worst percentage% of the population
+        contestants.reserve(popsize);
         contestants = tournSelect(popsize, !biggerBetter);
     }
 
-    for (int idx = 0; idx < numKillings; idx++) {
-        winners.push_back(contestants[idx]);
+    int idxToCull;
+    for (int cnt = 0; cnt < numKillings; cnt++) {
+        idxToCull = contestants[cnt];
+        pop[idxToCull].randomize();
+        fits[idxToCull] = fitness(pop[idxToCull]);
     }
-
-    for (int idx: winners) {
-        pop[idx].randomize();
-        fits[idx] = fitness(pop[idx]);
-    }
-
     return 0;
 }
 
@@ -510,7 +428,7 @@ int expReport(ostream &outp, vector<double> bestFits, SDA bestSDA, bool biggerBe
         bestIdx = (int) distance(bestFits.begin(), maxIterator.first);
     }
 
-    vector<double> stats = calcStats<double>(bestFits, BIGGERBETTER);
+    vector<double> stats = calcStats<double>(bestFits, BIGGER_BETTER);
     multiStream printAndSave(cout, outp);
     printAndSave << "Experiment Report:" << "\n";
     printAndSave << "Best Run: " << bestIdx + 1 << "\n";

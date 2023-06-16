@@ -1,61 +1,29 @@
 #include "testing.h"
 
-vector<int> runMultiMating(int numEvents, SDA mom, SDA dad) {
-    SDA child1, child2;
-    vector<int> fitVals;
-
-    fitVals.reserve(popsize);
-
-    for (int i = 0; i < numEvents; ++i) {
-        child1.copy(mom);
-        child2.copy(dad);
-        if (crossOp == 0) child1.twoPtCrossover(child2);
-        else if (crossOp == 1) child1.oneStateCrossover(child2);
-        fitVals.push_back((int) fitness(child1));
-        fitVals.push_back((int) fitness(child2));
-    }
-    return fitVals;
-}
-
-int crossoverCheck(ofstream &outp) {
-    outp << "Population Fitness Values:" << endl;
-
-    for (int i = 0; i < popsize; ++i) {
-        outp << fits[i] << endl;
-    }
-
-    outp << "Population Crossover Checks:" << endl;
-
-    for (int mom = 0; mom < popsize; mom++) {
-        for (int dad = mom + 1; dad < popsize; dad++) {
-            outp << "Parent Idxs: " << mom << "\t" << dad << endl;
-            outp << "Parent Fits: " << fits[mom] << "\t" << fits[dad] << endl;
-            printVector<ofstream, int>(outp, runMultiMating(mateTests, pop[mom], pop[dad]), "", "\n", true);
-        }
-    }
-    return 0;
-}
-
 int main(int argc, char *argv[]) {
     getArgs(argv);
     string pathToSeqs = "./Sequences.dat";
-    initAlg(pathToSeqs);
-
     char filename[200];
-    ofstream runStats, expStats, readMe, crossStart, crossEnd;
-
-    double expBestFit = (BIGGERBETTER ? 0 : MAXFLOAT);
-    SDA expBestSDA = SDA(sdaStates, numChars, 2, seqLen);
-
+    ofstream runStats, expStats, readMe, crossFile, mutateFile, sdaFile;
 
     vector<double> bests;
     bests.reserve(runs);
+    double expBestFit = (BIGGER_BETTER ? 0 : MAXFLOAT);
+    SDA expBestSDA = SDA(sdaStates, numChars, 2, seqLen);
 
-
+    initAlg(pathToSeqs);
     cmdLineIntro(cout);
-    sprintf(pathToOut, "./AAMOut/AAMatchTest on Seq%d with %04dPop, %02dSta, %02dMut, %02dTsz, %dCross/", seqNum,
-            popsize, sdaStates, maxMuts, tournSize, crossOp);
+    sprintf(pathToOut, "./AAMTestOut/AAMatchTest on Seq%d with %.1fmilMMEs, %04dPS, %02dSt, %dMNM, %dTS, %dCO, %03d%%CrR,"
+                       " %03d%%MR, %03d%%CuR, %sCu/", seqNum, (double)maxGens/1000000, popsize, sdaStates, maxMuts,
+                       tournSize, crossoverOp, (int)(crossoverRate*100), (int)(mutationRate * 100),
+                       (int)(cullingRate * 100), (randomCulling ? "R" : "W"));
     mkdir(pathToOut, 0777);
+    sprintf(filename, "%sCrossover Checks/", pathToOut);
+    mkdir(filename, 0777);
+    sprintf(filename, "%sMutate Checks/", pathToOut);
+    mkdir(filename, 0777);
+    sprintf(filename, "%sSDA Checks/", pathToOut);
+    mkdir(filename, 0777);
     expStats.open(string(pathToOut) + "./exp.dat", ios::out);
     readMe.open(string(pathToOut) + "./read.me", ios::out);
     makeReadMe(readMe);
@@ -64,27 +32,35 @@ int main(int argc, char *argv[]) {
     int tmp;
     for (int run = 1; run < runs + 1; ++run) {
         initPop(run);
-        sprintf(filename, "%scrossover%02d_start.dat", pathToOut, run);
-        crossStart.open(filename, ios::out);
-        crossoverCheck(crossStart);
-        crossStart.close();
-        cout << "Crossover Check Start Complete!" << endl;
+        sprintf(filename, "%s/Crossover Checks/crossover%02d_%05dk.dat", pathToOut, run, 0);
+        crossFile.open(filename, ios::out);
+        crossoverCheck(crossFile);
+        crossFile.close();
+        sprintf(filename, "%s/Mutate Checks/mutate%02d_%05dk.dat", pathToOut, run, 0);
+        mutateFile.open(filename, ios::out);
+        mutateCheck(mutateFile);
+        mutateFile.close();
+        sprintf(filename, "%s/SDA Checks/sda%02d_%05dk.dat", pathToOut, run, 0);
+        sdaFile.open(filename, ios::out);
+        sdaCheck(sdaFile);
+        sdaFile.close();
+        cout << "Initial Checks Complete!" << endl;
 
         sprintf(filename, "%srun%02d.dat", pathToOut, run);
         runStats.open(filename, ios::out);
         printExpStatsHeader(cout);
         printExpStatsHeader(runStats);
-        report(runStats, run, 0, BIGGERBETTER);
+        report(runStats, run, 0, BIGGER_BETTER);
 
         int gen = 1;
         int stallCount = 0;
-        double best = (BIGGERBETTER ? 0 : MAXFLOAT);
+        double best = (BIGGER_BETTER ? 0 : MAXFLOAT);
         while (gen <= maxGens && stallCount < TERM_CRIT) {
-            matingEvent(BIGGERBETTER);
+            matingEvent(BIGGER_BETTER);
 
             if (gen % REPORT_EVERY == 0) {
-                tmp = report(runStats, run, (int) gen / (REPORT_EVERY), BIGGERBETTER);
-                if ((BIGGERBETTER && tmp > best) || (!BIGGERBETTER && tmp < best)) {
+                tmp = report(runStats, run, (int) gen / (REPORT_EVERY), BIGGER_BETTER);
+                if ((BIGGER_BETTER && tmp > best) || (!BIGGER_BETTER && tmp < best)) {
                     best = tmp;
                     stallCount = 0;
                 } else {
@@ -92,29 +68,50 @@ int main(int argc, char *argv[]) {
                 }
             }
 
-            if (gen % (int) (CULLING_EVERY * REPORT_EVERY) == 0) {
-                culling(CULLING_ODDS, RANDOM_CULLING, BIGGERBETTER);
+            if (gen % (int) (CULLING_EVERY * REPORT_EVERY) == 0 && stallCount < TERM_CRIT) {
+                sprintf(filename, "%s/Crossover Checks/crossover%02d_%05dk.dat", pathToOut, run, gen/1000);
+                crossFile.open(filename, ios::out);
+                crossoverCheck(crossFile);
+                crossFile.close();
+                sprintf(filename, "%s/Mutate Checks/mutate%02d_%05dk.dat", pathToOut, run, gen/1000);
+                mutateFile.open(filename, ios::out);
+                mutateCheck(mutateFile);
+                mutateFile.close();
+                sprintf(filename, "%s/SDA Checks/sda%02d_%05dk.dat", pathToOut, run, gen/1000);
+                sdaFile.open(filename, ios::out);
+                sdaCheck(sdaFile);
+                sdaFile.close();
+                culling(cullingRate, randomCulling, BIGGER_BETTER);
             }
             gen++;
         }
-        tmp = runReport(expStats, BIGGERBETTER);
-        if ((BIGGERBETTER && fits[tmp] > expBestFit) || (!BIGGERBETTER && fits[tmp] < expBestFit)) {
+
+        tmp = runReport(expStats, BIGGER_BETTER);
+        if ((BIGGER_BETTER && fits[tmp] > expBestFit) || (!BIGGER_BETTER && fits[tmp] < expBestFit)) {
             expBestFit = fits[tmp];
             expBestSDA.copy(pop[tmp]);
         }
         bests.push_back(fits[tmp]);
         runStats.close();
 
-        sprintf(filename, "%scrossover%02d_end.dat", pathToOut, run);
-        crossEnd.open(filename, ios::out);
-        crossoverCheck(crossEnd);
-        crossEnd.close();
-        cout << "Crossover Check End Complete!" << endl;
+        sprintf(filename, "%s/Crossover Checks/crossover%02d_%05dk.dat", pathToOut, run, (gen - 1)/1000);
+        crossFile.open(filename, ios::out);
+        crossoverCheck(crossFile);
+        crossFile.close();
+        sprintf(filename, "%s/Mutate Checks/mutate%02d_%05dk.dat", pathToOut, run, (gen - 1)/1000);
+        mutateFile.open(filename, ios::out);
+        mutateCheck(mutateFile);
+        mutateFile.close();
+        sprintf(filename, "%s/SDA Checks/sda%02d_%05dk.dat", pathToOut, run, (gen - 1)/1000);
+        sdaFile.open(filename, ios::out);
+        sdaCheck(sdaFile);
+        sdaFile.close();
+        cout << "Final Checks Complete!" << endl;
     }
 
     ofstream best;
     best.open(string(pathToOut) + "./best.dat", ios::out);
-    expReport(best, bests, expBestSDA, BIGGERBETTER);
+    expReport(best, bests, expBestSDA, BIGGER_BETTER);
     best.close();
     delete[] pop;
     cout << "Program Completed Successfully!" << endl;

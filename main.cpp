@@ -15,6 +15,10 @@
  * 8.   Sequence number
  * 9.   Tournament size
  * 10.  Crossover operator
+ * 11.  Crossover Rate
+ * 12.  Mutation Rate
+ * 13.  Culling Rate
+ * 14.  Random Culling
  *
  * @param argc
  * @param argv
@@ -28,13 +32,15 @@ int main(int argc, char *argv[]) {
 
     vector<double> bests;
     bests.reserve(runs);
-    double expBestFit = (BIGGERBETTER ? 0 : MAXFLOAT);
+    double expBestFit = (BIGGER_BETTER ? 0 : MAXFLOAT);
     SDA expBestSDA = SDA(sdaStates, numChars, 2, seqLen);
 
     initAlg(pathToSeqs);
     cmdLineIntro(cout);
-    sprintf(pathToOut, "./AAMOut/AAMatch on Seq%d with %04dPop, %02dSta, %02dMut, %02dTsz, %dCross/", seqNum, popsize,
-            sdaStates, maxMuts, tournSize, crossOp);
+    sprintf(pathToOut, "./AAMOut/AAMatch on Seq%d with %.1fmilMMEs, %04dPS, %02dSt, %dMNM, %dTS, %dCO, %03d%%CrR,"
+                       " %03d%%MR, %03d%%CuR, %sCu/", seqNum, (double)maxGens/1000000, popsize, sdaStates, maxMuts,
+                       tournSize, crossoverOp, (int)(crossoverRate*100), (int)(mutationRate * 100),
+                       (int)(cullingRate * 100), (randomCulling ? "R" : "W"));
     mkdir(pathToOut, 0777);
     expStats.open(string(pathToOut) + "./exp.dat", ios::out);
     readMe.open(string(pathToOut) + "./read.me", ios::out);
@@ -48,17 +54,17 @@ int main(int argc, char *argv[]) {
         runStats.open(filename, ios::out);
         printExpStatsHeader(cout);
         printExpStatsHeader(runStats);
-        report(runStats, run, 0, BIGGERBETTER);
+        report(runStats, run, 0, BIGGER_BETTER);
 
         int gen = 1;
         int stallCount = 0;
-        double best = (BIGGERBETTER ? 0 : MAXFLOAT);
+        double best = (BIGGER_BETTER ? 0 : MAXFLOAT);
         while (gen <= maxGens && stallCount < TERM_CRIT) {
-            matingEvent(BIGGERBETTER);
+            matingEvent(BIGGER_BETTER);
 
             if (gen % REPORT_EVERY == 0) {
-                tmp = report(runStats, run, (int) gen / (REPORT_EVERY), BIGGERBETTER);
-                if ((BIGGERBETTER && tmp > best) || (!BIGGERBETTER && tmp < best)) {
+                tmp = report(runStats, run, (int) gen / (REPORT_EVERY), BIGGER_BETTER);
+                if ((BIGGER_BETTER && tmp > best) || (!BIGGER_BETTER && tmp < best)) {
                     best = tmp;
                     stallCount = 0;
                 } else {
@@ -66,14 +72,14 @@ int main(int argc, char *argv[]) {
                 }
             }
 
-            if (gen % (int) (CULLING_EVERY * REPORT_EVERY) == 0) {
-                culling(CULLING_ODDS, RANDOM_CULLING, BIGGERBETTER);
+            if (gen % (int) (CULLING_EVERY * REPORT_EVERY) == 0 && stallCount < TERM_CRIT) {
+                culling(cullingRate, randomCulling, BIGGER_BETTER);
             }
             gen++;
         }
 
-        tmp = runReport(expStats, BIGGERBETTER);
-        if ((BIGGERBETTER && fits[tmp] > expBestFit) || (!BIGGERBETTER && fits[tmp] < expBestFit)) {
+        tmp = runReport(expStats, BIGGER_BETTER);
+        if ((BIGGER_BETTER && fits[tmp] > expBestFit) || (!BIGGER_BETTER && fits[tmp] < expBestFit)) {
             expBestFit = fits[tmp];
             expBestSDA.copy(pop[tmp]);
         }
@@ -83,7 +89,7 @@ int main(int argc, char *argv[]) {
 
     ofstream best;
     best.open(string(pathToOut) + "./best.dat", ios::out);
-    expReport(best, bests, expBestSDA, BIGGERBETTER);
+    expReport(best, bests, expBestSDA, BIGGER_BETTER);
     best.close();
     delete[] pop;
     cout << "Program Completed Successfully!" << endl;

@@ -13,12 +13,12 @@ public:
     int setOutputLen(int newLen);
     int randomize();
     int copy(SDA &other);
-    int twoPtCrossover(SDA &other);
+    int twoPointCrossover(SDA &other);
     int oneStateCrossover(SDA &other);
     int mutate(int numMuts);
-    vector<int> rtnOutput(bool printToo = false, ostream &outStrm = cout);
-    int fillOutput(vector<int> &output, bool printToo = false, ostream &outStrm = cout);
-    int printSDA(ostream &outStrm);
+    vector<int> rtnOutput(bool printToo = false, ostream &outStream = cout);
+    int fillOutput(vector<int> &output, bool printToo = false, ostream &outStream = cout);
+    int printSDA(ostream &outStream);
 
 private:
     int create();

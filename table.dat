@@ -1,36 +1,256 @@
-./cmake-build-release---remote/AAMatcher 500 4 5 2929 50 10000000 1 5 5
-./cmake-build-release---remote/AAMatcher 500 4 5 2821 50 10000000 1 5 15
-./cmake-build-release---remote/AAMatcher 500 4 5 9029 50 10000000 3 5 5
-./cmake-build-release---remote/AAMatcher 500 4 5 7021 50 10000000 3 5 15
-./cmake-build-release---remote/AAMatcher 500 4 5 2600 50 10000000 10 5 5
-./cmake-build-release---remote/AAMatcher 500 4 5 1831 50 10000000 10 5 15
-./cmake-build-release---remote/AAMatcher 500 4 20 9137 50 10000000 1 5 5
-./cmake-build-release---remote/AAMatcher 500 4 20 1435 50 10000000 1 5 15
-./cmake-build-release---remote/AAMatcher 500 4 20 1070 50 10000000 3 5 5
-./cmake-build-release---remote/AAMatcher 500 4 20 9375 50 10000000 3 5 15
-./cmake-build-release---remote/AAMatcher 500 4 20 7352 50 10000000 10 5 5
-./cmake-build-release---remote/AAMatcher 500 4 20 2329 50 10000000 10 5 15
-./cmake-build-release---remote/AAMatcher 500 4 50 8763 50 10000000 1 5 5
-./cmake-build-release---remote/AAMatcher 500 4 50 4077 50 10000000 1 5 15
-./cmake-build-release---remote/AAMatcher 500 4 50 8243 50 10000000 3 5 5
-./cmake-build-release---remote/AAMatcher 500 4 50 5347 50 10000000 3 5 15
-./cmake-build-release---remote/AAMatcher 500 4 50 4717 50 10000000 10 5 5
-./cmake-build-release---remote/AAMatcher 500 4 50 9968 50 10000000 10 5 15
-./cmake-build-release---remote/AAMatcher 5000 4 5 6784 50 10000000 1 5 5
-./cmake-build-release---remote/AAMatcher 5000 4 5 4907 50 10000000 1 5 15
-./cmake-build-release---remote/AAMatcher 5000 4 5 1434 50 10000000 3 5 5
-./cmake-build-release---remote/AAMatcher 5000 4 5 1825 50 10000000 3 5 15
-./cmake-build-release---remote/AAMatcher 5000 4 5 2566 50 10000000 10 5 5
-./cmake-build-release---remote/AAMatcher 5000 4 5 4063 50 10000000 10 5 15
-./cmake-build-release---remote/AAMatcher 5000 4 20 9068 50 10000000 1 5 5
-./cmake-build-release---remote/AAMatcher 5000 4 20 4478 50 10000000 1 5 15
-./cmake-build-release---remote/AAMatcher 5000 4 20 4461 50 10000000 3 5 5
-./cmake-build-release---remote/AAMatcher 5000 4 20 4985 50 10000000 3 5 15
-./cmake-build-release---remote/AAMatcher 5000 4 20 5323 50 10000000 10 5 5
-./cmake-build-release---remote/AAMatcher 5000 4 20 5422 50 10000000 10 5 15
-./cmake-build-release---remote/AAMatcher 5000 4 50 4065 50 10000000 1 5 5
-./cmake-build-release---remote/AAMatcher 5000 4 50 1150 50 10000000 1 5 15
-./cmake-build-release---remote/AAMatcher 5000 4 50 5283 50 10000000 3 5 5
-./cmake-build-release---remote/AAMatcher 5000 4 50 5888 50 10000000 3 5 15
-./cmake-build-release---remote/AAMatcher 5000 4 50 5842 50 10000000 10 5 5
-./cmake-build-release---remote/AAMatcher 5000 4 50 8907 50 10000000 10 5 15
+./cmake-build-release---remote/AAMatcher 50 4 12 6296 50 1000000 3 1 5 0 0.50 0.50 1.00 0
+./cmake-build-release---remote/AAMatcher 50 4 12 1871 50 1000000 3 1 5 0 0.50 0.50 1.00 1
+./cmake-build-release---remote/AAMatcher 50 4 12 5403 50 1000000 3 1 5 0 0.50 0.50 0.25 0
+./cmake-build-release---remote/AAMatcher 50 4 12 7575 50 1000000 3 1 5 0 0.50 0.50 0.25 1
+./cmake-build-release---remote/AAMatcher 50 4 12 8993 50 1000000 3 1 5 0 0.50 1.00 1.00 0
+./cmake-build-release---remote/AAMatcher 50 4 12 3917 50 1000000 3 1 5 0 0.50 1.00 1.00 1
+./cmake-build-release---remote/AAMatcher 50 4 12 7435 50 1000000 3 1 5 0 0.50 1.00 0.25 0
+./cmake-build-release---remote/AAMatcher 50 4 12 9800 50 1000000 3 1 5 0 0.50 1.00 0.25 1
+./cmake-build-release---remote/AAMatcher 50 4 12 2521 50 1000000 3 1 5 0 1.00 0.50 1.00 0
+./cmake-build-release---remote/AAMatcher 50 4 12 5073 50 1000000 3 1 5 0 1.00 0.50 1.00 1
+./cmake-build-release---remote/AAMatcher 50 4 12 4812 50 1000000 3 1 5 0 1.00 0.50 0.25 0
+./cmake-build-release---remote/AAMatcher 50 4 12 7543 50 1000000 3 1 5 0 1.00 0.50 0.25 1
+./cmake-build-release---remote/AAMatcher 50 4 12 8893 50 1000000 3 1 5 0 1.00 1.00 1.00 0
+./cmake-build-release---remote/AAMatcher 50 4 12 8618 50 1000000 3 1 5 0 1.00 1.00 1.00 1
+./cmake-build-release---remote/AAMatcher 50 4 12 4054 50 1000000 3 1 5 0 1.00 1.00 0.25 0
+./cmake-build-release---remote/AAMatcher 50 4 12 1966 50 1000000 3 1 5 0 1.00 1.00 0.25 1
+./cmake-build-release---remote/AAMatcher 50 4 12 3837 50 1000000 3 1 5 1 0.50 0.50 1.00 0
+./cmake-build-release---remote/AAMatcher 50 4 12 4336 50 1000000 3 1 5 1 0.50 0.50 1.00 1
+./cmake-build-release---remote/AAMatcher 50 4 12 1056 50 1000000 3 1 5 1 0.50 0.50 0.25 0
+./cmake-build-release---remote/AAMatcher 50 4 12 9988 50 1000000 3 1 5 1 0.50 0.50 0.25 1
+./cmake-build-release---remote/AAMatcher 50 4 12 4505 50 1000000 3 1 5 1 0.50 1.00 1.00 0
+./cmake-build-release---remote/AAMatcher 50 4 12 4379 50 1000000 3 1 5 1 0.50 1.00 1.00 1
+./cmake-build-release---remote/AAMatcher 50 4 12 5918 50 1000000 3 1 5 1 0.50 1.00 0.25 0
+./cmake-build-release---remote/AAMatcher 50 4 12 6220 50 1000000 3 1 5 1 0.50 1.00 0.25 1
+./cmake-build-release---remote/AAMatcher 50 4 12 1588 50 1000000 3 1 5 1 1.00 0.50 1.00 0
+./cmake-build-release---remote/AAMatcher 50 4 12 7222 50 1000000 3 1 5 1 1.00 0.50 1.00 1
+./cmake-build-release---remote/AAMatcher 50 4 12 8671 50 1000000 3 1 5 1 1.00 0.50 0.25 0
+./cmake-build-release---remote/AAMatcher 50 4 12 8180 50 1000000 3 1 5 1 1.00 0.50 0.25 1
+./cmake-build-release---remote/AAMatcher 50 4 12 2865 50 1000000 3 1 5 1 1.00 1.00 1.00 0
+./cmake-build-release---remote/AAMatcher 50 4 12 8663 50 1000000 3 1 5 1 1.00 1.00 1.00 1
+./cmake-build-release---remote/AAMatcher 50 4 12 6318 50 1000000 3 1 5 1 1.00 1.00 0.25 0
+./cmake-build-release---remote/AAMatcher 50 4 12 9899 50 1000000 3 1 5 1 1.00 1.00 0.25 1
+./cmake-build-release---remote/AAMatcher 50 4 12 2678 50 1000000 3 1 9 0 0.50 0.50 1.00 0
+./cmake-build-release---remote/AAMatcher 50 4 12 5663 50 1000000 3 1 9 0 0.50 0.50 1.00 1
+./cmake-build-release---remote/AAMatcher 50 4 12 4128 50 1000000 3 1 9 0 0.50 0.50 0.25 0
+./cmake-build-release---remote/AAMatcher 50 4 12 4956 50 1000000 3 1 9 0 0.50 0.50 0.25 1
+./cmake-build-release---remote/AAMatcher 50 4 12 9304 50 1000000 3 1 9 0 0.50 1.00 1.00 0
+./cmake-build-release---remote/AAMatcher 50 4 12 2293 50 1000000 3 1 9 0 0.50 1.00 1.00 1
+./cmake-build-release---remote/AAMatcher 50 4 12 9558 50 1000000 3 1 9 0 0.50 1.00 0.25 0
+./cmake-build-release---remote/AAMatcher 50 4 12 1480 50 1000000 3 1 9 0 0.50 1.00 0.25 1
+./cmake-build-release---remote/AAMatcher 50 4 12 5782 50 1000000 3 1 9 0 1.00 0.50 1.00 0
+./cmake-build-release---remote/AAMatcher 50 4 12 2511 50 1000000 3 1 9 0 1.00 0.50 1.00 1
+./cmake-build-release---remote/AAMatcher 50 4 12 6513 50 1000000 3 1 9 0 1.00 0.50 0.25 0
+./cmake-build-release---remote/AAMatcher 50 4 12 8144 50 1000000 3 1 9 0 1.00 0.50 0.25 1
+./cmake-build-release---remote/AAMatcher 50 4 12 9042 50 1000000 3 1 9 0 1.00 1.00 1.00 0
+./cmake-build-release---remote/AAMatcher 50 4 12 4935 50 1000000 3 1 9 0 1.00 1.00 1.00 1
+./cmake-build-release---remote/AAMatcher 50 4 12 9983 50 1000000 3 1 9 0 1.00 1.00 0.25 0
+./cmake-build-release---remote/AAMatcher 50 4 12 8312 50 1000000 3 1 9 0 1.00 1.00 0.25 1
+./cmake-build-release---remote/AAMatcher 50 4 12 9069 50 1000000 3 1 9 1 0.50 0.50 1.00 0
+./cmake-build-release---remote/AAMatcher 50 4 12 5785 50 1000000 3 1 9 1 0.50 0.50 1.00 1
+./cmake-build-release---remote/AAMatcher 50 4 12 5584 50 1000000 3 1 9 1 0.50 0.50 0.25 0
+./cmake-build-release---remote/AAMatcher 50 4 12 7687 50 1000000 3 1 9 1 0.50 0.50 0.25 1
+./cmake-build-release---remote/AAMatcher 50 4 12 9949 50 1000000 3 1 9 1 0.50 1.00 1.00 0
+./cmake-build-release---remote/AAMatcher 50 4 12 7103 50 1000000 3 1 9 1 0.50 1.00 1.00 1
+./cmake-build-release---remote/AAMatcher 50 4 12 1552 50 1000000 3 1 9 1 0.50 1.00 0.25 0
+./cmake-build-release---remote/AAMatcher 50 4 12 7378 50 1000000 3 1 9 1 0.50 1.00 0.25 1
+./cmake-build-release---remote/AAMatcher 50 4 12 5795 50 1000000 3 1 9 1 1.00 0.50 1.00 0
+./cmake-build-release---remote/AAMatcher 50 4 12 3143 50 1000000 3 1 9 1 1.00 0.50 1.00 1
+./cmake-build-release---remote/AAMatcher 50 4 12 9211 50 1000000 3 1 9 1 1.00 0.50 0.25 0
+./cmake-build-release---remote/AAMatcher 50 4 12 2892 50 1000000 3 1 9 1 1.00 0.50 0.25 1
+./cmake-build-release---remote/AAMatcher 50 4 12 4050 50 1000000 3 1 9 1 1.00 1.00 1.00 0
+./cmake-build-release---remote/AAMatcher 50 4 12 1203 50 1000000 3 1 9 1 1.00 1.00 1.00 1
+./cmake-build-release---remote/AAMatcher 50 4 12 9810 50 1000000 3 1 9 1 1.00 1.00 0.25 0
+./cmake-build-release---remote/AAMatcher 50 4 12 4520 50 1000000 3 1 9 1 1.00 1.00 0.25 1
+./cmake-build-release---remote/AAMatcher 50 4 12 6046 50 1000000 6 1 5 0 0.50 0.50 1.00 0
+./cmake-build-release---remote/AAMatcher 50 4 12 6231 50 1000000 6 1 5 0 0.50 0.50 1.00 1
+./cmake-build-release---remote/AAMatcher 50 4 12 2528 50 1000000 6 1 5 0 0.50 0.50 0.25 0
+./cmake-build-release---remote/AAMatcher 50 4 12 1542 50 1000000 6 1 5 0 0.50 0.50 0.25 1
+./cmake-build-release---remote/AAMatcher 50 4 12 2871 50 1000000 6 1 5 0 0.50 1.00 1.00 0
+./cmake-build-release---remote/AAMatcher 50 4 12 4450 50 1000000 6 1 5 0 0.50 1.00 1.00 1
+./cmake-build-release---remote/AAMatcher 50 4 12 1192 50 1000000 6 1 5 0 0.50 1.00 0.25 0
+./cmake-build-release---remote/AAMatcher 50 4 12 8169 50 1000000 6 1 5 0 0.50 1.00 0.25 1
+./cmake-build-release---remote/AAMatcher 50 4 12 1441 50 1000000 6 1 5 0 1.00 0.50 1.00 0
+./cmake-build-release---remote/AAMatcher 50 4 12 2326 50 1000000 6 1 5 0 1.00 0.50 1.00 1
+./cmake-build-release---remote/AAMatcher 50 4 12 5701 50 1000000 6 1 5 0 1.00 0.50 0.25 0
+./cmake-build-release---remote/AAMatcher 50 4 12 6335 50 1000000 6 1 5 0 1.00 0.50 0.25 1
+./cmake-build-release---remote/AAMatcher 50 4 12 4993 50 1000000 6 1 5 0 1.00 1.00 1.00 0
+./cmake-build-release---remote/AAMatcher 50 4 12 8589 50 1000000 6 1 5 0 1.00 1.00 1.00 1
+./cmake-build-release---remote/AAMatcher 50 4 12 7724 50 1000000 6 1 5 0 1.00 1.00 0.25 0
+./cmake-build-release---remote/AAMatcher 50 4 12 9076 50 1000000 6 1 5 0 1.00 1.00 0.25 1
+./cmake-build-release---remote/AAMatcher 50 4 12 7559 50 1000000 6 1 5 1 0.50 0.50 1.00 0
+./cmake-build-release---remote/AAMatcher 50 4 12 7860 50 1000000 6 1 5 1 0.50 0.50 1.00 1
+./cmake-build-release---remote/AAMatcher 50 4 12 2007 50 1000000 6 1 5 1 0.50 0.50 0.25 0
+./cmake-build-release---remote/AAMatcher 50 4 12 9590 50 1000000 6 1 5 1 0.50 0.50 0.25 1
+./cmake-build-release---remote/AAMatcher 50 4 12 3989 50 1000000 6 1 5 1 0.50 1.00 1.00 0
+./cmake-build-release---remote/AAMatcher 50 4 12 5800 50 1000000 6 1 5 1 0.50 1.00 1.00 1
+./cmake-build-release---remote/AAMatcher 50 4 12 9953 50 1000000 6 1 5 1 0.50 1.00 0.25 0
+./cmake-build-release---remote/AAMatcher 50 4 12 2027 50 1000000 6 1 5 1 0.50 1.00 0.25 1
+./cmake-build-release---remote/AAMatcher 50 4 12 7333 50 1000000 6 1 5 1 1.00 0.50 1.00 0
+./cmake-build-release---remote/AAMatcher 50 4 12 1840 50 1000000 6 1 5 1 1.00 0.50 1.00 1
+./cmake-build-release---remote/AAMatcher 50 4 12 2086 50 1000000 6 1 5 1 1.00 0.50 0.25 0
+./cmake-build-release---remote/AAMatcher 50 4 12 9168 50 1000000 6 1 5 1 1.00 0.50 0.25 1
+./cmake-build-release---remote/AAMatcher 50 4 12 1408 50 1000000 6 1 5 1 1.00 1.00 1.00 0
+./cmake-build-release---remote/AAMatcher 50 4 12 5261 50 1000000 6 1 5 1 1.00 1.00 1.00 1
+./cmake-build-release---remote/AAMatcher 50 4 12 3517 50 1000000 6 1 5 1 1.00 1.00 0.25 0
+./cmake-build-release---remote/AAMatcher 50 4 12 7385 50 1000000 6 1 5 1 1.00 1.00 0.25 1
+./cmake-build-release---remote/AAMatcher 50 4 12 8337 50 1000000 6 1 9 0 0.50 0.50 1.00 0
+./cmake-build-release---remote/AAMatcher 50 4 12 3852 50 1000000 6 1 9 0 0.50 0.50 1.00 1
+./cmake-build-release---remote/AAMatcher 50 4 12 3528 50 1000000 6 1 9 0 0.50 0.50 0.25 0
+./cmake-build-release---remote/AAMatcher 50 4 12 6145 50 1000000 6 1 9 0 0.50 0.50 0.25 1
+./cmake-build-release---remote/AAMatcher 50 4 12 7377 50 1000000 6 1 9 0 0.50 1.00 1.00 0
+./cmake-build-release---remote/AAMatcher 50 4 12 7231 50 1000000 6 1 9 0 0.50 1.00 1.00 1
+./cmake-build-release---remote/AAMatcher 50 4 12 4566 50 1000000 6 1 9 0 0.50 1.00 0.25 0
+./cmake-build-release---remote/AAMatcher 50 4 12 4908 50 1000000 6 1 9 0 0.50 1.00 0.25 1
+./cmake-build-release---remote/AAMatcher 50 4 12 9957 50 1000000 6 1 9 0 1.00 0.50 1.00 0
+./cmake-build-release---remote/AAMatcher 50 4 12 6236 50 1000000 6 1 9 0 1.00 0.50 1.00 1
+./cmake-build-release---remote/AAMatcher 50 4 12 5543 50 1000000 6 1 9 0 1.00 0.50 0.25 0
+./cmake-build-release---remote/AAMatcher 50 4 12 9508 50 1000000 6 1 9 0 1.00 0.50 0.25 1
+./cmake-build-release---remote/AAMatcher 50 4 12 3009 50 1000000 6 1 9 0 1.00 1.00 1.00 0
+./cmake-build-release---remote/AAMatcher 50 4 12 2062 50 1000000 6 1 9 0 1.00 1.00 1.00 1
+./cmake-build-release---remote/AAMatcher 50 4 12 9221 50 1000000 6 1 9 0 1.00 1.00 0.25 0
+./cmake-build-release---remote/AAMatcher 50 4 12 9464 50 1000000 6 1 9 0 1.00 1.00 0.25 1
+./cmake-build-release---remote/AAMatcher 50 4 12 7495 50 1000000 6 1 9 1 0.50 0.50 1.00 0
+./cmake-build-release---remote/AAMatcher 50 4 12 5109 50 1000000 6 1 9 1 0.50 0.50 1.00 1
+./cmake-build-release---remote/AAMatcher 50 4 12 1296 50 1000000 6 1 9 1 0.50 0.50 0.25 0
+./cmake-build-release---remote/AAMatcher 50 4 12 4185 50 1000000 6 1 9 1 0.50 0.50 0.25 1
+./cmake-build-release---remote/AAMatcher 50 4 12 6896 50 1000000 6 1 9 1 0.50 1.00 1.00 0
+./cmake-build-release---remote/AAMatcher 50 4 12 7169 50 1000000 6 1 9 1 0.50 1.00 1.00 1
+./cmake-build-release---remote/AAMatcher 50 4 12 7417 50 1000000 6 1 9 1 0.50 1.00 0.25 0
+./cmake-build-release---remote/AAMatcher 50 4 12 7836 50 1000000 6 1 9 1 0.50 1.00 0.25 1
+./cmake-build-release---remote/AAMatcher 50 4 12 1173 50 1000000 6 1 9 1 1.00 0.50 1.00 0
+./cmake-build-release---remote/AAMatcher 50 4 12 1576 50 1000000 6 1 9 1 1.00 0.50 1.00 1
+./cmake-build-release---remote/AAMatcher 50 4 12 1898 50 1000000 6 1 9 1 1.00 0.50 0.25 0
+./cmake-build-release---remote/AAMatcher 50 4 12 9207 50 1000000 6 1 9 1 1.00 0.50 0.25 1
+./cmake-build-release---remote/AAMatcher 50 4 12 4046 50 1000000 6 1 9 1 1.00 1.00 1.00 0
+./cmake-build-release---remote/AAMatcher 50 4 12 5089 50 1000000 6 1 9 1 1.00 1.00 1.00 1
+./cmake-build-release---remote/AAMatcher 50 4 12 4857 50 1000000 6 1 9 1 1.00 1.00 0.25 0
+./cmake-build-release---remote/AAMatcher 50 4 12 9713 50 1000000 6 1 9 1 1.00 1.00 0.25 1
+./cmake-build-release---remote/AAMatcher 50 4 24 8358 50 1000000 3 1 5 0 0.50 0.50 1.00 0
+./cmake-build-release---remote/AAMatcher 50 4 24 3608 50 1000000 3 1 5 0 0.50 0.50 1.00 1
+./cmake-build-release---remote/AAMatcher 50 4 24 4433 50 1000000 3 1 5 0 0.50 0.50 0.25 0
+./cmake-build-release---remote/AAMatcher 50 4 24 8239 50 1000000 3 1 5 0 0.50 0.50 0.25 1
+./cmake-build-release---remote/AAMatcher 50 4 24 4845 50 1000000 3 1 5 0 0.50 1.00 1.00 0
+./cmake-build-release---remote/AAMatcher 50 4 24 9041 50 1000000 3 1 5 0 0.50 1.00 1.00 1
+./cmake-build-release---remote/AAMatcher 50 4 24 1100 50 1000000 3 1 5 0 0.50 1.00 0.25 0
+./cmake-build-release---remote/AAMatcher 50 4 24 3951 50 1000000 3 1 5 0 0.50 1.00 0.25 1
+./cmake-build-release---remote/AAMatcher 50 4 24 6356 50 1000000 3 1 5 0 1.00 0.50 1.00 0
+./cmake-build-release---remote/AAMatcher 50 4 24 6328 50 1000000 3 1 5 0 1.00 0.50 1.00 1
+./cmake-build-release---remote/AAMatcher 50 4 24 5324 50 1000000 3 1 5 0 1.00 0.50 0.25 0
+./cmake-build-release---remote/AAMatcher 50 4 24 6003 50 1000000 3 1 5 0 1.00 0.50 0.25 1
+./cmake-build-release---remote/AAMatcher 50 4 24 2327 50 1000000 3 1 5 0 1.00 1.00 1.00 0
+./cmake-build-release---remote/AAMatcher 50 4 24 9844 50 1000000 3 1 5 0 1.00 1.00 1.00 1
+./cmake-build-release---remote/AAMatcher 50 4 24 5804 50 1000000 3 1 5 0 1.00 1.00 0.25 0
+./cmake-build-release---remote/AAMatcher 50 4 24 6582 50 1000000 3 1 5 0 1.00 1.00 0.25 1
+./cmake-build-release---remote/AAMatcher 50 4 24 4443 50 1000000 3 1 5 1 0.50 0.50 1.00 0
+./cmake-build-release---remote/AAMatcher 50 4 24 4699 50 1000000 3 1 5 1 0.50 0.50 1.00 1
+./cmake-build-release---remote/AAMatcher 50 4 24 8027 50 1000000 3 1 5 1 0.50 0.50 0.25 0
+./cmake-build-release---remote/AAMatcher 50 4 24 3458 50 1000000 3 1 5 1 0.50 0.50 0.25 1
+./cmake-build-release---remote/AAMatcher 50 4 24 5626 50 1000000 3 1 5 1 0.50 1.00 1.00 0
+./cmake-build-release---remote/AAMatcher 50 4 24 7155 50 1000000 3 1 5 1 0.50 1.00 1.00 1
+./cmake-build-release---remote/AAMatcher 50 4 24 5969 50 1000000 3 1 5 1 0.50 1.00 0.25 0
+./cmake-build-release---remote/AAMatcher 50 4 24 8177 50 1000000 3 1 5 1 0.50 1.00 0.25 1
+./cmake-build-release---remote/AAMatcher 50 4 24 7587 50 1000000 3 1 5 1 1.00 0.50 1.00 0
+./cmake-build-release---remote/AAMatcher 50 4 24 2511 50 1000000 3 1 5 1 1.00 0.50 1.00 1
+./cmake-build-release---remote/AAMatcher 50 4 24 7953 50 1000000 3 1 5 1 1.00 0.50 0.25 0
+./cmake-build-release---remote/AAMatcher 50 4 24 6997 50 1000000 3 1 5 1 1.00 0.50 0.25 1
+./cmake-build-release---remote/AAMatcher 50 4 24 8968 50 1000000 3 1 5 1 1.00 1.00 1.00 0
+./cmake-build-release---remote/AAMatcher 50 4 24 1816 50 1000000 3 1 5 1 1.00 1.00 1.00 1
+./cmake-build-release---remote/AAMatcher 50 4 24 9664 50 1000000 3 1 5 1 1.00 1.00 0.25 0
+./cmake-build-release---remote/AAMatcher 50 4 24 2447 50 1000000 3 1 5 1 1.00 1.00 0.25 1
+./cmake-build-release---remote/AAMatcher 50 4 24 7316 50 1000000 3 1 9 0 0.50 0.50 1.00 0
+./cmake-build-release---remote/AAMatcher 50 4 24 7816 50 1000000 3 1 9 0 0.50 0.50 1.00 1
+./cmake-build-release---remote/AAMatcher 50 4 24 8250 50 1000000 3 1 9 0 0.50 0.50 0.25 0
+./cmake-build-release---remote/AAMatcher 50 4 24 8777 50 1000000 3 1 9 0 0.50 0.50 0.25 1
+./cmake-build-release---remote/AAMatcher 50 4 24 8424 50 1000000 3 1 9 0 0.50 1.00 1.00 0
+./cmake-build-release---remote/AAMatcher 50 4 24 5174 50 1000000 3 1 9 0 0.50 1.00 1.00 1
+./cmake-build-release---remote/AAMatcher 50 4 24 3838 50 1000000 3 1 9 0 0.50 1.00 0.25 0
+./cmake-build-release---remote/AAMatcher 50 4 24 5636 50 1000000 3 1 9 0 0.50 1.00 0.25 1
+./cmake-build-release---remote/AAMatcher 50 4 24 4774 50 1000000 3 1 9 0 1.00 0.50 1.00 0
+./cmake-build-release---remote/AAMatcher 50 4 24 4276 50 1000000 3 1 9 0 1.00 0.50 1.00 1
+./cmake-build-release---remote/AAMatcher 50 4 24 3598 50 1000000 3 1 9 0 1.00 0.50 0.25 0
+./cmake-build-release---remote/AAMatcher 50 4 24 8089 50 1000000 3 1 9 0 1.00 0.50 0.25 1
+./cmake-build-release---remote/AAMatcher 50 4 24 4791 50 1000000 3 1 9 0 1.00 1.00 1.00 0
+./cmake-build-release---remote/AAMatcher 50 4 24 8206 50 1000000 3 1 9 0 1.00 1.00 1.00 1
+./cmake-build-release---remote/AAMatcher 50 4 24 9816 50 1000000 3 1 9 0 1.00 1.00 0.25 0
+./cmake-build-release---remote/AAMatcher 50 4 24 7633 50 1000000 3 1 9 0 1.00 1.00 0.25 1
+./cmake-build-release---remote/AAMatcher 50 4 24 7078 50 1000000 3 1 9 1 0.50 0.50 1.00 0
+./cmake-build-release---remote/AAMatcher 50 4 24 4441 50 1000000 3 1 9 1 0.50 0.50 1.00 1
+./cmake-build-release---remote/AAMatcher 50 4 24 9648 50 1000000 3 1 9 1 0.50 0.50 0.25 0
+./cmake-build-release---remote/AAMatcher 50 4 24 8557 50 1000000 3 1 9 1 0.50 0.50 0.25 1
+./cmake-build-release---remote/AAMatcher 50 4 24 9108 50 1000000 3 1 9 1 0.50 1.00 1.00 0
+./cmake-build-release---remote/AAMatcher 50 4 24 6690 50 1000000 3 1 9 1 0.50 1.00 1.00 1
+./cmake-build-release---remote/AAMatcher 50 4 24 7188 50 1000000 3 1 9 1 0.50 1.00 0.25 0
+./cmake-build-release---remote/AAMatcher 50 4 24 9293 50 1000000 3 1 9 1 0.50 1.00 0.25 1
+./cmake-build-release---remote/AAMatcher 50 4 24 9594 50 1000000 3 1 9 1 1.00 0.50 1.00 0
+./cmake-build-release---remote/AAMatcher 50 4 24 6248 50 1000000 3 1 9 1 1.00 0.50 1.00 1
+./cmake-build-release---remote/AAMatcher 50 4 24 4499 50 1000000 3 1 9 1 1.00 0.50 0.25 0
+./cmake-build-release---remote/AAMatcher 50 4 24 5391 50 1000000 3 1 9 1 1.00 0.50 0.25 1
+./cmake-build-release---remote/AAMatcher 50 4 24 9495 50 1000000 3 1 9 1 1.00 1.00 1.00 0
+./cmake-build-release---remote/AAMatcher 50 4 24 5707 50 1000000 3 1 9 1 1.00 1.00 1.00 1
+./cmake-build-release---remote/AAMatcher 50 4 24 5468 50 1000000 3 1 9 1 1.00 1.00 0.25 0
+./cmake-build-release---remote/AAMatcher 50 4 24 6698 50 1000000 3 1 9 1 1.00 1.00 0.25 1
+./cmake-build-release---remote/AAMatcher 50 4 24 8696 50 1000000 6 1 5 0 0.50 0.50 1.00 0
+./cmake-build-release---remote/AAMatcher 50 4 24 9056 50 1000000 6 1 5 0 0.50 0.50 1.00 1
+./cmake-build-release---remote/AAMatcher 50 4 24 2285 50 1000000 6 1 5 0 0.50 0.50 0.25 0
+./cmake-build-release---remote/AAMatcher 50 4 24 9639 50 1000000 6 1 5 0 0.50 0.50 0.25 1
+./cmake-build-release---remote/AAMatcher 50 4 24 3492 50 1000000 6 1 5 0 0.50 1.00 1.00 0
+./cmake-build-release---remote/AAMatcher 50 4 24 8092 50 1000000 6 1 5 0 0.50 1.00 1.00 1
+./cmake-build-release---remote/AAMatcher 50 4 24 7532 50 1000000 6 1 5 0 0.50 1.00 0.25 0
+./cmake-build-release---remote/AAMatcher 50 4 24 4302 50 1000000 6 1 5 0 0.50 1.00 0.25 1
+./cmake-build-release---remote/AAMatcher 50 4 24 5462 50 1000000 6 1 5 0 1.00 0.50 1.00 0
+./cmake-build-release---remote/AAMatcher 50 4 24 6513 50 1000000 6 1 5 0 1.00 0.50 1.00 1
+./cmake-build-release---remote/AAMatcher 50 4 24 4531 50 1000000 6 1 5 0 1.00 0.50 0.25 0
+./cmake-build-release---remote/AAMatcher 50 4 24 3020 50 1000000 6 1 5 0 1.00 0.50 0.25 1
+./cmake-build-release---remote/AAMatcher 50 4 24 4315 50 1000000 6 1 5 0 1.00 1.00 1.00 0
+./cmake-build-release---remote/AAMatcher 50 4 24 4209 50 1000000 6 1 5 0 1.00 1.00 1.00 1
+./cmake-build-release---remote/AAMatcher 50 4 24 1117 50 1000000 6 1 5 0 1.00 1.00 0.25 0
+./cmake-build-release---remote/AAMatcher 50 4 24 2360 50 1000000 6 1 5 0 1.00 1.00 0.25 1
+./cmake-build-release---remote/AAMatcher 50 4 24 3447 50 1000000 6 1 5 1 0.50 0.50 1.00 0
+./cmake-build-release---remote/AAMatcher 50 4 24 2734 50 1000000 6 1 5 1 0.50 0.50 1.00 1
+./cmake-build-release---remote/AAMatcher 50 4 24 7022 50 1000000 6 1 5 1 0.50 0.50 0.25 0
+./cmake-build-release---remote/AAMatcher 50 4 24 6507 50 1000000 6 1 5 1 0.50 0.50 0.25 1
+./cmake-build-release---remote/AAMatcher 50 4 24 2756 50 1000000 6 1 5 1 0.50 1.00 1.00 0
+./cmake-build-release---remote/AAMatcher 50 4 24 5801 50 1000000 6 1 5 1 0.50 1.00 1.00 1
+./cmake-build-release---remote/AAMatcher 50 4 24 8836 50 1000000 6 1 5 1 0.50 1.00 0.25 0
+./cmake-build-release---remote/AAMatcher 50 4 24 7673 50 1000000 6 1 5 1 0.50 1.00 0.25 1
+./cmake-build-release---remote/AAMatcher 50 4 24 5539 50 1000000 6 1 5 1 1.00 0.50 1.00 0
+./cmake-build-release---remote/AAMatcher 50 4 24 5021 50 1000000 6 1 5 1 1.00 0.50 1.00 1
+./cmake-build-release---remote/AAMatcher 50 4 24 8283 50 1000000 6 1 5 1 1.00 0.50 0.25 0
+./cmake-build-release---remote/AAMatcher 50 4 24 7639 50 1000000 6 1 5 1 1.00 0.50 0.25 1
+./cmake-build-release---remote/AAMatcher 50 4 24 9382 50 1000000 6 1 5 1 1.00 1.00 1.00 0
+./cmake-build-release---remote/AAMatcher 50 4 24 5728 50 1000000 6 1 5 1 1.00 1.00 1.00 1
+./cmake-build-release---remote/AAMatcher 50 4 24 4212 50 1000000 6 1 5 1 1.00 1.00 0.25 0
+./cmake-build-release---remote/AAMatcher 50 4 24 6308 50 1000000 6 1 5 1 1.00 1.00 0.25 1
+./cmake-build-release---remote/AAMatcher 50 4 24 9021 50 1000000 6 1 9 0 0.50 0.50 1.00 0
+./cmake-build-release---remote/AAMatcher 50 4 24 7082 50 1000000 6 1 9 0 0.50 0.50 1.00 1
+./cmake-build-release---remote/AAMatcher 50 4 24 6489 50 1000000 6 1 9 0 0.50 0.50 0.25 0
+./cmake-build-release---remote/AAMatcher 50 4 24 1356 50 1000000 6 1 9 0 0.50 0.50 0.25 1
+./cmake-build-release---remote/AAMatcher 50 4 24 1647 50 1000000 6 1 9 0 0.50 1.00 1.00 0
+./cmake-build-release---remote/AAMatcher 50 4 24 4210 50 1000000 6 1 9 0 0.50 1.00 1.00 1
+./cmake-build-release---remote/AAMatcher 50 4 24 3515 50 1000000 6 1 9 0 0.50 1.00 0.25 0
+./cmake-build-release---remote/AAMatcher 50 4 24 9107 50 1000000 6 1 9 0 0.50 1.00 0.25 1
+./cmake-build-release---remote/AAMatcher 50 4 24 2396 50 1000000 6 1 9 0 1.00 0.50 1.00 0
+./cmake-build-release---remote/AAMatcher 50 4 24 3133 50 1000000 6 1 9 0 1.00 0.50 1.00 1
+./cmake-build-release---remote/AAMatcher 50 4 24 1157 50 1000000 6 1 9 0 1.00 0.50 0.25 0
+./cmake-build-release---remote/AAMatcher 50 4 24 7419 50 1000000 6 1 9 0 1.00 0.50 0.25 1
+./cmake-build-release---remote/AAMatcher 50 4 24 3354 50 1000000 6 1 9 0 1.00 1.00 1.00 0
+./cmake-build-release---remote/AAMatcher 50 4 24 7270 50 1000000 6 1 9 0 1.00 1.00 1.00 1
+./cmake-build-release---remote/AAMatcher 50 4 24 5808 50 1000000 6 1 9 0 1.00 1.00 0.25 0
+./cmake-build-release---remote/AAMatcher 50 4 24 9432 50 1000000 6 1 9 0 1.00 1.00 0.25 1
+./cmake-build-release---remote/AAMatcher 50 4 24 4841 50 1000000 6 1 9 1 0.50 0.50 1.00 0
+./cmake-build-release---remote/AAMatcher 50 4 24 4595 50 1000000 6 1 9 1 0.50 0.50 1.00 1
+./cmake-build-release---remote/AAMatcher 50 4 24 9740 50 1000000 6 1 9 1 0.50 0.50 0.25 0
+./cmake-build-release---remote/AAMatcher 50 4 24 1349 50 1000000 6 1 9 1 0.50 0.50 0.25 1
+./cmake-build-release---remote/AAMatcher 50 4 24 1219 50 1000000 6 1 9 1 0.50 1.00 1.00 0
+./cmake-build-release---remote/AAMatcher 50 4 24 1033 50 1000000 6 1 9 1 0.50 1.00 1.00 1
+./cmake-build-release---remote/AAMatcher 50 4 24 6057 50 1000000 6 1 9 1 0.50 1.00 0.25 0
+./cmake-build-release---remote/AAMatcher 50 4 24 6059 50 1000000 6 1 9 1 0.50 1.00 0.25 1
+./cmake-build-release---remote/AAMatcher 50 4 24 9972 50 1000000 6 1 9 1 1.00 0.50 1.00 0
+./cmake-build-release---remote/AAMatcher 50 4 24 1356 50 1000000 6 1 9 1 1.00 0.50 1.00 1
+./cmake-build-release---remote/AAMatcher 50 4 24 6857 50 1000000 6 1 9 1 1.00 0.50 0.25 0
+./cmake-build-release---remote/AAMatcher 50 4 24 3744 50 1000000 6 1 9 1 1.00 0.50 0.25 1
+./cmake-build-release---remote/AAMatcher 50 4 24 8717 50 1000000 6 1 9 1 1.00 1.00 1.00 0
+./cmake-build-release---remote/AAMatcher 50 4 24 4978 50 1000000 6 1 9 1 1.00 1.00 1.00 1
+./cmake-build-release---remote/AAMatcher 50 4 24 7863 50 1000000 6 1 9 1 1.00 1.00 0.25 0
+./cmake-build-release---remote/AAMatcher 50 4 24 1530 50 1000000 6 1 9 1 1.00 1.00 0.25 1
