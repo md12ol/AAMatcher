@@ -22,7 +22,7 @@ SDA::SDA(int numStates, int numChars, int maxRespLen, int outputLen, int initSta
         }
     }
     create();
-    if (verbose) cout << "SDA Made with " << numStates << " numStates." << endl;
+    if (verbose) cout << "SDA made with " << numStates << " numStates." << endl;
 }
 
 SDA::SDA() : SDA(10, 2, 2, 1000) {}
@@ -63,6 +63,7 @@ int SDA::create() {
         }
         responses.push_back(oneStateResps);
     }
+    if (verbose) cout << "SDA initialized." << endl;
     return 0;
 }
 
@@ -108,24 +109,24 @@ int SDA::copy(SDA &other) {
     }
 
     initChar = other.initChar;
-    if (numStates != other.numStates){
+    if (numStates != other.numStates) {
         transitions.reserve(other.numStates);
         responses.reserve(other.numStates);
     }
     numStates = other.numStates;
     initState = other.initState;
-    if (numChars != other.numChars){
-        for (auto &stateTrans: transitions){
+    if (numChars != other.numChars) {
+        for (auto &stateTrans: transitions) {
             stateTrans.reserve(other.numChars);
         }
-        for (auto &stateResp: responses){
+        for (auto &stateResp: responses) {
             stateResp.reserve(other.numChars);
         }
     }
     numChars = other.numChars;
-    if (maxRespLen != other.maxRespLen){
-        for (auto &stateResp: responses){
-            for (auto &resp: stateResp){
+    if (maxRespLen != other.maxRespLen) {
+        for (auto &stateResp: responses) {
+            for (auto &resp: stateResp) {
                 resp.reserve(other.maxRespLen);
             }
         }
@@ -142,23 +143,23 @@ int SDA::copy(SDA &other) {
 
 int SDA::twoPointCrossover(SDA &other) {
     if (initChar < 0) {
-        cout << "Error in SDA Class: twoPtCrossover(...): this SDA has not been initialized.";
+        cout << "Error in SDA Class: twoPointCrossover(...): this SDA has not been initialized.";
         return -1;
     }
     if (other.initChar < 0) {
-        cout << "Error in SDA Class: twoPtCrossover(...): other SDA has not been initialized.";
+        cout << "Error in SDA Class: twoPointCrossover(...): other SDA has not been initialized.";
         return -1;
     }
     if (numStates != other.numStates) {
-        cout << "Error in SDA Class: twoPtCrossover(...): the two SDAs have a different numStates.";
+        cout << "Error in SDA Class: twoPointCrossover(...): the two SDAs have a different numStates.";
         return 1;
     }
     if (numChars != other.numChars) {
-        cout << "Error in SDA Class: twoPtCrossover(...): the two SDAs have a different numChars.";
+        cout << "Error in SDA Class: twoPointCrossover(...): the two SDAs have a different numChars.";
         return 1;
     }
     if (maxRespLen != other.maxRespLen) {
-        cout << "Error in SDA Class: twoPtCrossover(...): the two SDAs have a different maxRespLen.";
+        cout << "Error in SDA Class: twoPointCrossover(...): the two SDAs have a different maxRespLen.";
         return 1;
     }
 
@@ -307,22 +308,7 @@ vector<int> SDA::rtnOutput(bool printToo, ostream &outStream) {
     }
 
     vector<int> output(outputLen);
-    int headIdx = 0;
-    int tailIdx = 0;
-    curState = initState;
-    output[headIdx++] = initChar;
-    if (printToo) outStream << initChar;
-
-    while (headIdx < outputLen) {
-        for (int val: responses[curState][output[tailIdx]]) {
-            if (headIdx < outputLen) {
-                output[headIdx++] = val;
-                if (printToo) outStream << " " << val;
-            }
-        }
-        curState = transitions[curState][output[tailIdx++]];
-    }
-    if (printToo) outStream << endl;
+    fillOutput(output, printToo, outStream);
     return output;
 }
 
@@ -335,9 +321,9 @@ int SDA::printSDA(ostream &outStream = cout) {
     outStream << initState << " <- " << initChar << endl;
     for (int state = 0; state < numStates; ++state) {
         for (int trans = 0; trans < numChars; ++trans) {
-            outStream << state << " + " << trans << " -> " << transitions.at(state).at(trans) << " [";
-            for (int v: responses.at(state).at(trans)) {
-                outStream << " " << v;
+            outStream << state << " + " << trans << " -> " << transitions[state][trans] << " [";
+            for (int vec: responses[state][trans]) {
+                outStream << " " << vec;
             }
             outStream << " ]" << endl;
         }

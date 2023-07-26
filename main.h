@@ -30,7 +30,8 @@ double crossoverRate;
 double mutationRate;
 double cullingRate;
 bool randomCulling;
-int bestIdx;
+int populationBestIdx;
+double populationBestFit;
 
 vector<int> goalSeq;
 vector<int> testSeq;
@@ -150,6 +151,9 @@ int initAlg(const string &pathToSeqs) {
         testSeq.push_back(-1);
         charSeq.push_back('a');
     }
+
+    populationBestIdx = -1;
+    populationBestFit = (BIGGER_BETTER ? 0.0 : MAXFLOAT);
     return 0;
 }
 
@@ -267,7 +271,8 @@ vector<double> calcStats(vector<T> vals, bool biggerBetter) {
         sum += val;
         if ((biggerBetter && val > bestVal) || (!biggerBetter && val < bestVal)) {
             bestVal = val;
-            bestIdx = idx;
+            populationBestIdx = idx;
+            populationBestFit = bestVal;
         }
     }
 
@@ -291,7 +296,7 @@ int matingEvent(bool biggerBetter) {
     child1.copy(pop[idxs[0]]);
     child2.copy(pop[idxs[1]]);
     if (drand48() < crossoverRate) {
-        if (crossoverOp == 0) child1.twoPtCrossover(child2);
+        if (crossoverOp == 0) child1.twoPointCrossover(child2);
         else if (crossoverOp == 1) child1.oneStateCrossover(child2);
     }
 
@@ -341,7 +346,7 @@ bool compareFitness(int popIdx1, int popIdx2) {
 
 int culling(double percentage, bool rndPick, bool biggerBetter) {
     if (percentage == 1) { // Cull all but the best SDA
-        pop[0].copy(pop[bestIdx]);
+        pop[0].copy(pop[populationBestIdx]);
         fits[0] = fitness(pop[0]);
         for (int idx = 1; idx < popsize; ++idx) {
             pop[idx].randomize();
@@ -420,19 +425,11 @@ int printMatches(T1 &outp, const vector<T2> &test, const vector<T2> &goal, bool 
 }
 
 int expReport(ostream &outp, vector<double> bestFits, SDA bestSDA, bool biggerBetter) {
-    auto maxIterator = minmax_element(bestFits.begin(), bestFits.end());
-    int bestIdx;
-    if (biggerBetter) {
-        bestIdx = (int) distance(bestFits.begin(), maxIterator.second);
-    } else {
-        bestIdx = (int) distance(bestFits.begin(), maxIterator.first);
-    }
-
     vector<double> stats = calcStats<double>(bestFits, BIGGER_BETTER);
     multiStream printAndSave(cout, outp);
     printAndSave << "Experiment Report:" << "\n";
-    printAndSave << "Best Run: " << bestIdx + 1 << "\n";
-    printAndSave << "Best Fitness: " << bestFits[bestIdx] << " of " << seqLen << "\n";
+    printAndSave << "Best Run: " << populationBestIdx + 1 << "\n";
+    printAndSave << "Best Fitness: " << bestFits[populationBestIdx] << " of " << seqLen << "\n";
     printAndSave << "Fitness 95% CI: " << stats[0] << " +- " << stats[2] << "\n";
     printAndSave << "\n";
     printAndSave << left << setw(20) << "Best Match: ";

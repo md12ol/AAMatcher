@@ -29,7 +29,6 @@ int main(int argc, char *argv[]) {
     string pathToSeqs = "./Sequences.dat";
     string filename;
     ofstream runStats, expStats, readMe;
-
     vector<double> bests;
     bests.reserve(runs);
     double expBestFit = (BIGGER_BETTER ? 0 : MAXFLOAT);
@@ -37,10 +36,10 @@ int main(int argc, char *argv[]) {
 
     initAlg(pathToSeqs);
     cmdLineIntro(cout);
-    sprintf(pathToOut, "./AAMOut/AAMatch on Seq%d with %.1fmilMMEs, %04dPS, %02dSt, %dMNM, %dTS, %dCO, %03d%%CrR,"
-                       " %03d%%MR, %03d%%CuR, %sCu/", seqNum, (double)maxGens/1000000, popsize, sdaStates, maxMuts,
-                       tournSize, crossoverOp, (int)(crossoverRate*100), (int)(mutationRate * 100),
-                       (int)(cullingRate * 100), (randomCulling ? "R" : "W"));
+    sprintf(pathToOut, "./AAMOut/AAMatch on Seq%d with %.1fmilMMEs, %04dPS, %02dSt, %dMNM, %dTS, %sCO, %03d%%CrR,"
+                       " %03d%%MR, %03d%%CuR, %sCu/", seqNum, (double) maxGens / 1000000, popsize, sdaStates, maxMuts,
+            tournSize, (crossoverOp == 0 ? "2Pt" : "1St"), (int) (crossoverRate * 100), (int) (mutationRate * 100),
+            (int) (cullingRate * 100), (randomCulling ? "Rand" : "Worst"));
     mkdir(pathToOut, 0777);
     expStats.open(string(pathToOut) + "./exp.dat", ios::out);
     readMe.open(string(pathToOut) + "./read.me", ios::out);
@@ -50,7 +49,9 @@ int main(int argc, char *argv[]) {
     int tmp;
     for (int run = 1; run < runs + 1; ++run) {
         initPop(run);
-        filename = string(pathToOut) + "run" + to_string(run) + ".dat";
+        char runNumStr[10];
+        sprintf(runNumStr, "%02d", run);
+        filename = string(pathToOut) + "run" + string(runNumStr) + ".dat";
         runStats.open(filename, ios::out);
         printExpStatsHeader(cout);
         printExpStatsHeader(runStats);

@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 from graphviz import Graph
 import numpy as np
 
-inp = "../../Conferences and Papers/2023 CIBCB/AAMatcher/AAMOut/"
+inp = "./AAMOut/"
 outp = "./AAMFigs/"
 finame = "exp.dat"
 samps = 50
@@ -69,7 +69,7 @@ def box_plot(bp, num_splits: int, split_info: []):
         pass
 
     for median in bp['medians']:
-        median.set(color='#FF7F0E', linewidth=1)
+        median.set(color='#AAAAAA', linewidth=1)
         pass
 
     for flier in bp['fliers']:
@@ -213,22 +213,22 @@ def gen_sequences(path: str):
     seqs = []
     with open(path, "r") as f:
         lines = f.readlines()
-        till_seq = 2
+        seq_label = False
+        next_seq = False
         for line in lines:
             line = line.rstrip()
             if line.__contains__('>'):
-                till_seq = 2
+                seq_label = True
                 pass
-            elif till_seq == 1:
+            elif seq_label:
+                seq_label = False
+                next_seq = True
+            elif next_seq:
                 seqs.append(line)
-                till_seq = 0
-                pass
-            else:
-                till_seq = 1
+                next_seq = False
                 pass
             pass
         pass
-    seqs.append("ATGGGACGCAAGGACGAGCAGAAGCAAACGAGCGCCACAAGCACGCCGGGGCAGGGG")
     return seqs
 
 
@@ -267,12 +267,26 @@ def DNA_to_int(seq: str):
 def main():
     print("START")
     folder_names = os.listdir(inp)
-    seq_idxs = [0, 1, 2, 3, 4, 5]
-    # seq_idxs = [1, 2, 3, 4]
-    popsizes = [500, 5000]
-    num_states = [5, 20, 50]
-    max_muts = [1, 3, 10]
-    tourn_sizes = [5, 15]
+    seq_idx = 1
+
+    states = ["12St", "24St"]
+    muts = ["2MNM", "4MNM", "7MNM", "10MNM"]
+    tsize = ["5TS", "9TS"]
+    crossover = ["1StCO", "2PtCO"]
+    cross_rate = ["050%CrR", "100$CrR"]
+    mut_rate = ["050%MR", "100%MR"]
+    cull_rate = ["025%CuR", "100%CuR"]
+    cull_mode = ["RandCu", "WorstCu"]
+
+    groups = []
+    for s in states:
+        for m in muts:
+            for t in tsize:
+                groups.append([s,m,t])
+                pass
+            pass
+        pass
+
     sequences = gen_sequences("./Sequences.dat")
     for idx in range(len(sequences)):
         sequences[idx] = DNA_to_int(sequences[idx])
@@ -286,125 +300,127 @@ def main():
         print(dat)
         pass
 
-    exp_dat = []
+    exp_dirs = []
+    all_dirs = []
+    for eidx, dat in enumerate(groups):
+        one_exp = []
+        for fld in folder_names:
+            if all(fld.__contains__(itm) for itm in dat):
+                if not (fld.__contains__("RandCu") and fld.__contains__("100%CuR")):
+                    one_exp.append(fld)
+                    all_dirs.append(fld)
+                pass
+            pass
+        exp_dirs.append(one_exp)
+        pass
+
     exp_lbls = []
-    exp_descriptions = []
     exp_num = 1
-    for ps in popsizes:
-        for ns in num_states:
-            for mm in max_muts:
-                for ts in tourn_sizes:
-                    exp_dat.append([str(ps).rjust(4, '0') + "Pop", str(ns).rjust(2, '0') + "Sta",
-                                    str(mm).rjust(2, '0') + "Mut", str(ts).rjust(2, '0') + "Tsz"])
-                    exp_lbls.append(str(exp_num) + "(" + str(ps).rjust(4, '_') + ", " + str(ns).rjust(2, '_') +
-                                    ", " + str(mm).rjust(2, '_') +
-                                    ", " + str(ts).rjust(2, '_') + ")")
-                    exp_descriptions.append(str(ps).rjust(4, '0') + "Pop, " + str(ns).rjust(2, '0') + "Sta, " +
-                                            str(mm).rjust(2, '0') + "Mut, " +
-                                            str(ts).rjust(2, '0') + "Tsz")
-                    exp_num += 1
-                    pass
-                pass
-            pass
+    for dir in exp_dirs[0]:
+        lbl = ""
+        fields = dir.rstrip().split(",")
+        lbl += str(exp_num).zfill(2) + "("
+        lbl += fields[5].lstrip().split("CO")[0] + ", "
+        lbl += str(int(fields[6].lstrip().split("%CrR")[0])).zfill(3) + ", "
+        lbl += str(int(fields[7].lstrip().split("%MR")[0])).zfill(3) + ", "
+        lbl += str(int(fields[8].lstrip().split("%CuR")[0])).zfill(3) + ", "
+        lbl += fields[9].lstrip().split("Cu")[0][0] + ")"
+        exp_lbls.append(lbl)
+        exp_num += 1
         pass
 
-    seq_dirs = []
-    for seq in seq_idxs:
-        one_dirs = []
-        for eidx, dat in enumerate(exp_dat):
-            for fld in folder_names:
-                if all(fld.__contains__(itm) for itm in dat) and str("Seq" + str(seq)) in fld:
-                    one_dirs.append(fld)
-                    pass
-                pass
-            pass
-        seq_dirs.append(one_dirs)
-        pass
-
-    # mode_data[seq][exp][run][0] = run num
-    # mode_data[seq][exp][run][1] = run's fit (sorted based on this)
-    # mode_data[seq][exp][run][2][:] = run's SDA
-    # mode_data[seq][exp][run][3] = run's sequence
-    mode_data = [[] for _ in range(len(seq_idxs))]
-    for sidx, seq in enumerate(seq_idxs):
-        for fld in seq_dirs[sidx]:
-            mode_data[sidx].append(get_data(inp + fld + "/"))
+    # mode_data[group][exp][run][0] = run num
+    # mode_data[group][exp][run][1] = run's fit (sorted based on this)
+    # mode_data[group][exp][run][2][:] = run's SDA
+    # mode_data[group][exp][run][3] = run's sequence
+    mode_data = [[] for _ in range(len(exp_dirs))]
+    for eidx, exp in enumerate(groups):
+        for fld in exp_dirs[eidx]:
+            mode_data[eidx].append(get_data(inp + fld + "/"))
             pass
         pass
 
     # mode_stats[seq][exp] = [run's fitness vals]
-    mode_stats = [[] for _ in range(len(seq_idxs))]
+    mode_stats = [[] for _ in range(len(groups))]
     make_all = False
     make_any = False
-    for sidx, seq in enumerate(seq_idxs):
-        for expidx, exp in enumerate(mode_data[sidx]):
+    for gidx, seq in enumerate(groups):
+        for expidx, exp in enumerate(mode_data[gidx]):
             exp_fits = []
             for runidx, run in enumerate(exp):
                 exp_fits.append(run[1])
                 pass
-            mode_stats[sidx].append(exp_fits)
+            mode_stats[gidx].append(exp_fits)
             pass
         pass
 
-    title = "Sequence Matching with Sequence "
+    title = "Sequence Matching with Sequence 1 and "
     # xsp = [[i for i in range(len(all_data[0]))], [i for i in range(len(all_data[1]))]]
     # xpos = [xsp[0], xsp[1], xsp[0], xsp[1], xsp[0], xsp[1], xsp[0], xsp[1]]
     ylb = "Fitness"
-    xlb = "Experiment (Popsize, SDA States, Max Muts., Tourn. Size)"
+    xlb = "Experiment (Crossover Operator, Crossover Rate, Mutation Rate, Culling Rate, Culling Strategy)"
 
-    # lxpos = []
-    # for i in range(2, len(all_data[0]) - 3, 3):
-    #     lxpos.append(i + 0.5)
-    #     pass
-    # base_colors = ["#808080", "#696969"]
-    colors = ['#0077AA','#0000FF', '#00AA00', '#00FF00','#AAAA00', '#FFFF00']
-    for sidx, seq in enumerate(seq_idxs):
+    lxpos = []
+    for i in range(6, len(mode_stats[0]), 6):
+        lxpos.append(i + 0.5)
+        pass
+    colors = ['#FF88FF','#FF8888', '#FFFF88', '#0088FF','#008888', '#00FF88']
+    for gidx, seq in enumerate(groups):
+        f = open(outp + "exp_table" + str(gidx + 1) + ".dat", "w")
+        for idxx, gr in enumerate(exp_dirs[gidx]):
+            f.write(str(idxx + 1) + "\t")
+            f.write(gr)
+            f.write("\n")
+            pass
+        f.close()
+
         plt.style.use("seaborn-v0_8")
-        plt.rc('xtick', labelsize=10)
-        plt.rc('ytick', labelsize=10)
+        plt.rc('xtick', labelsize=8)
+        plt.rc('ytick', labelsize=8)
 
         f = plt.figure()
         f.set_figheight(4.5)
         f.set_figwidth(8)
         plot = f.add_subplot(111)
 
-        bp = plot.boxplot(mode_stats[sidx], patch_artist=True)
-        box_plot(bp, 1, [[[i for i in range(len(mode_stats[sidx]))], colors]])
+        bp = plot.boxplot(mode_stats[gidx], patch_artist=True)
+        box_plot(bp, 1, [[[i for i in range(len(mode_stats[gidx]))], colors]])
 
         # plot.set_xticks(xpos[idx])
         plot.set_xticklabels(exp_lbls, rotation=90)
 
-        # f.suptitle(title + str(seq), fontsize=14)
-        plot.set_xlabel(xlb, fontsize=12)
-        plot.set_ylabel(ylb, fontsize=12)
+        new_title = title + groups[gidx][0] + " " + groups[gidx][1] + " " + groups[gidx][2]
+        f.suptitle(new_title, fontsize=14)
+        plot.set_xlabel(xlb, fontsize=10)
+        plot.set_ylabel(ylb, fontsize=10)
 
-        plot.hlines([len(sequences[seq])], 0.5, len(mode_stats[sidx]) + 0.5, colors="#0000FF", linestyles="dashed", linewidth=1)
-        # for x in lxpos:
-        #     plot.axvline(x=x, color='black', linestyle='--', linewidth=0.75)
-        #     pass
+        plot.hlines([len(sequences[seq_idx])], 0.5, len(mode_stats[seq_idx]) + 0.5, colors="#0000FF", linestyles="dashed", linewidth=1)
+        for x in lxpos:
+            plot.axvline(x=x, color='black', linestyle='--', linewidth=0.75)
+            pass
         plot.grid(visible="True", axis="y", which='major', color="darkgray", linewidth=0.75)
         f.tight_layout()
-        f.savefig(outp + "AAMatchSeq" + str(seq) + "_boxplot.png", dpi=300)
+        f.savefig(outp + "AAMatchSeq" + str(gidx + 1) + "_boxplot.png", dpi=300)
         plt.close()
         pass
 
-    for sidx, seq in enumerate(seq_idxs):
-        best_runs = []
-        best_of_best_exp = -1
-        best_of_best_val = 0
-        for didx, dat in enumerate(mode_data[sidx]):
-            best_runs.append(dat[0][0])
-            if dat[0][1] > best_of_best_val:
-                best_of_best_val = dat[0][1]
-                best_of_best_exp = didx
-            pass
-        make_table(mode_stats[sidx], best_runs, exp_descriptions, outp +
-                   "Seq" + str(seq) + "table" + ".dat", False)
-        info = "Best for Sequence " + str(seq) + " is " + \
-               "EXP" + str(best_of_best_exp + 1) + ": " + str(exp_descriptions[best_of_best_exp])
-        print_best_info(outp + "Seq" + str(seq) + "_best.dat", info,
-                        mode_data[sidx][best_of_best_exp][0], sequences[seq])
-        pass
+    # for sidx, seq in enumerate(seq_idxs):
+    #     best_runs = []
+    #     best_of_best_exp = -1
+    #     best_of_best_val = 0
+    #     for didx, dat in enumerate(mode_data[sidx]):
+    #         best_runs.append(dat[0][0])
+    #         if dat[0][1] > best_of_best_val:
+    #             best_of_best_val = dat[0][1]
+    #             best_of_best_exp = didx
+    #         pass
+    #     make_table(mode_stats[sidx], best_runs, exp_descriptions, outp +
+    #                "Seq" + str(seq) + "table" + ".dat", False)
+    #     info = "Best for Sequence " + str(seq) + " is " + \
+    #            "EXP" + str(best_of_best_exp + 1) + ": " + str(exp_descriptions[best_of_best_exp])
+    #     print_best_info(outp + "Seq" + str(seq) + "_best.dat", info,
+    #                     mode_data[sidx][best_of_best_exp][0], sequences[seq])
+    #     pass
 
     # mode_data[mode][exp][run][0] = run num
     # mode_data[mode][exp][run][1] = run's fit (sorted based on this)

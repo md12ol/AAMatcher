@@ -3,10 +3,10 @@ from random import randint
 exec_path = "./cmake-build-release---remote/AAMatcher"
 popsizes = [50]
 num_chars = 4
-num_states = [12, 24]
+num_states = [6]
 num_runs = 50
 gens = 1000000
-max_muts = [3, 6]
+max_muts = [2, 4, 7, 10]
 seq_nums = [1]
 tourn_sizes = [5, 9]
 crossOp = [0, 1]
