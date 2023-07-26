@@ -11,14 +11,16 @@
  * 4.   Seed
  * 5.   Number of runs
  * 6.   Maximum number of mating events
- * 7.   Maximum number of mutations
- * 8.   Sequence number
- * 9.   Tournament size
- * 10.  Crossover operator
- * 11.  Crossover Rate
- * 12.  Mutation Rate
- * 13.  Culling Rate
- * 14.  Random Culling
+ * 7.   Default Number of Transition Mutations
+ * 8.   Default Number of Response Mutations
+ * 9.   Dynamic Mutation Operator? (0 -> static, >0 -> dynamic implementation to use)
+ * 10.  Sequence number
+ * 11.  Tournament size
+ * 12.  Crossover operator
+ * 13.  Crossover Rate
+ * 14.  Mutation Rate
+ * 15.  Culling Rate
+ * 16.  Random Culling
  *
  * @param argc
  * @param argv

@@ -22,7 +22,9 @@ double *sdaProbs;
 int seed;
 int runs;
 int maxGens;
-int maxMuts;
+int numTransMuts;
+int numRespMuts;
+int dynamicMutOperator;
 int tournSize;
 int seqNum;
 int crossoverOp;
@@ -113,21 +115,25 @@ int getArgs(char *arguments[]) {
     runs = stoi(arg, &pos);
     arg = arguments[6]; // maxGens
     maxGens = stoi(arg, &pos);
-    arg = arguments[7]; // maxMuts
-    maxMuts = stoi(arg, &pos);
-    arg = arguments[8]; // seqNum
+    arg = arguments[7]; // numTransMuts
+    numTransMuts = stoi(arg, &pos);
+    arg = arguments[8]; // numRespMuts
+    numRespMuts = stoi(arg, &pos);
+    arg = arguments[9]; // dynamicMutOperator
+    dynamicMutOperator = stoi(arg, &pos);
+    arg = arguments[10]; // seqNum
     seqNum = stoi(arg, &pos);
-    arg = arguments[9]; // tournSize
+    arg = arguments[11]; // tournSize
     tournSize = stoi(arg, &pos);
-    arg = arguments[10]; // crossoverOp
+    arg = arguments[12]; // crossoverOp
     crossoverOp = stoi(arg, &pos);
-    arg = arguments[11]; // crossoverRate
+    arg = arguments[13]; // crossoverRate
     crossoverRate = stod(arg, &pos);
-    arg = arguments[12]; // mutationRate
+    arg = arguments[14]; // mutationRate
     mutationRate = stod(arg, &pos);
-    arg = arguments[13]; // cullingRate
+    arg = arguments[15]; // cullingRate
     cullingRate = stod(arg, &pos);
-    arg = arguments[14]; // randomCulling
+    arg = arguments[16]; // randomCulling
     randomCulling = stoi(arg, &pos) == 1;
     cout << "Arguments Captured!" << endl;
     return 0;
@@ -198,7 +204,7 @@ int makeReadMe(ostream &outp) {
     outp << "Tournament Size: " << tournSize << endl;
     outp << "Crossover Operator: " << (crossoverOp == 0 ? "Two-Point Crossover" : "One-State Crossover") << endl;
     outp << "Crossover Rate: " << (int) (crossoverRate * 100) << "%" << endl;
-    outp << "Maximum Number of Mutations: " << maxMuts << endl;
+//    outp << "Maximum Number of Mutations: " << maxMuts << endl; //TODO: Update
     outp << "Mutation Rate: " << (int) (mutationRate * 100) << "%" << endl;
     outp << "Culling Every: " << CULLING_EVERY * REPORT_EVERY << " generations" << endl;
     if (randomCulling) {
@@ -300,11 +306,11 @@ int matingEvent(bool biggerBetter) {
         else if (crossoverOp == 1) child1.oneStateCrossover(child2);
     }
 
-    if (drand48() < mutationRate && maxMuts > 0) {
-        numMuts = (int) lrand48() % maxMuts + 1;
-        child1.mutate(numMuts);
-        numMuts = (int) lrand48() % maxMuts + 1;
-        child2.mutate(numMuts);
+    if (drand48() < mutationRate) {
+        if (dynamicMutOperator == 0){
+            child1.mutate(numTransMuts, numRespMuts);
+            child2.mutate(numTransMuts, numRespMuts);
+        }
     }
 
     pop[idxs.end()[-1]] = child1;

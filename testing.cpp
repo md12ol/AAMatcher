@@ -1,23 +1,7 @@
 #include "testing.h"
 
 /**
- * This method...
- *
- * Input variables:
- * 1.   Population size
- * 2.   Number of characters (in SDA)
- * 3.   Number of states
- * 4.   Seed
- * 5.   Number of runs
- * 6.   Maximum number of mating events
- * 7.   Maximum number of mutations
- * 8.   Sequence number
- * 9.   Tournament size
- * 10.  Crossover operator
- * 11.  Crossover Rate
- * 12.  Mutation Rate
- * 13.  Culling Rate
- * 14.  Random Culling
+ * This method mirrors the main method in main.cpp.  For command line argument descriptions see that method.
  *
  * @param argc
  * @param argv
@@ -64,7 +48,6 @@ int main(int argc, char *argv[]) {
         mutateFile.open(filename, ios::out);
         mutateCheck(mutateFile);
         mutateFile.close();
-
 
         cout << "Initial Checks Complete!" << endl;
         sprintf(filename, "%s/SDA Checks/pop%02d.dat", pathToOut, run);
