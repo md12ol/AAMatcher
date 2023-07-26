@@ -19,6 +19,7 @@ public:
     int twoPointCrossover(SDA &other);
     int oneStateCrossover(SDA &other);
     int mutate(int numMuts);
+    int mutate(int transMuts, int respMuts);
     int fillOutput(vector<int> &output, bool printToo = false, ostream &outStream = cout);
     vector<int> rtnOutput(bool printToo = false, ostream &outStream = cout);
     int printSDA(ostream &outStream);
