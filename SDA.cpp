@@ -271,6 +271,38 @@ int SDA::mutate(int numMuts) {
     return 0;
 }
 
+int SDA::mutate(int transMuts, int respMuts) {//!!!!!!!!!!!!!!!!!!!!!! Static version (does fixed amount of mutations for each type)
+    if (initChar < 0) {
+        cout << "Error in SDA Class: mutate(...): this SDA has not been initialized.";
+        return -1;
+    }
+
+    if (drand48() < 0.1) { // 10% chance of mutating initial character
+        initChar = (int) lrand48() % numChars;
+        }
+
+    int mutPt, respSize;
+    vector<int> oneResponse;
+
+    for (int mut = 0; mut < transMuts; ++mut) {
+        mutPt = (int) lrand48() % numStates;
+        int transNum = (int) lrand48() % numChars;
+        transitions.at(mutPt).at(transNum) = (int) lrand48() % numStates;
+    }
+
+    for(int mut = 0; mut < respMuts; ++mut){
+        mutPt = (int) lrand48() % numStates;
+        int transNum = (int) lrand48() % numChars;
+        oneResponse.clear();
+        respSize = (int) lrand48() % maxRespLen + 1;
+        for (int i = 0; i < respSize; ++i) {
+            oneResponse.push_back((int) lrand48() % numChars);
+        }
+        responses.at(mutPt).at(transNum) = oneResponse;
+    }
+    return 0;
+}
+
 int SDA::fillOutput(vector<int> &output, bool printToo, ostream &outStream) {
     if (initChar < 0) {
         cout << "Error in SDA Class: fillOutput(...): this SDA has not been initialized.";
