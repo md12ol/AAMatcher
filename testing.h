@@ -62,11 +62,9 @@ int matingEvent(bool biggerBetter, int currentGen, ostream &outp) {
     child2b.copy(child2a);
     fit2b = fit2a;
 
-    if (drand48() < mutationRate && maxMuts > 0) {
-        numMuts = (int) lrand48() % maxMuts + 1;
-        child1b.mutate(numMuts);
-        numMuts = (int) lrand48() % maxMuts + 1;
-        child2b.mutate(numMuts);
+    if (drand48() < mutationRate) {
+        child1b.mutate(numTransMuts, numRespMuts);
+        child2b.mutate(numTransMuts, numRespMuts);
 
         fit1b = fitness(child1b);
         fit2b = fitness(child2b);
