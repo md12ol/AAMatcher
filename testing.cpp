@@ -1,10 +1,34 @@
 #include "testing.h"
 
+/**
+ * This method...
+ *
+ * Input variables:
+ * 1.   Population size
+ * 2.   Number of characters (in SDA)
+ * 3.   Number of states
+ * 4.   Seed
+ * 5.   Number of runs
+ * 6.   Maximum number of mating events
+ * 7.   Maximum number of mutations
+ * 8.   Sequence number
+ * 9.   Tournament size
+ * 10.  Crossover operator
+ * 11.  Crossover Rate
+ * 12.  Mutation Rate
+ * 13.  Culling Rate
+ * 14.  Random Culling
+ *
+ * @param argc
+ * @param argv
+ * @return
+ */
+
 int main(int argc, char *argv[]) {
     getArgs(argv);
     string pathToSeqs = "./Sequences.dat";
     char filename[200];
-    ofstream runStats, expStats, readMe, crossFile, mutateFile, sdaFile;
+    ofstream runStats, expStats, readMe, crossFile, mutateFile, sdaFile, runGains, runPopulation;
 
     vector<double> bests;
     bests.reserve(runs);
@@ -13,10 +37,10 @@ int main(int argc, char *argv[]) {
 
     initAlg(pathToSeqs);
     cmdLineIntro(cout);
-    sprintf(pathToOut, "./AAMTestOut/AAMatchTest on Seq%d with %.1fmilMMEs, %04dPS, %02dSt, %dMNM, %dTS, %dCO, %03d%%CrR,"
-                       " %03d%%MR, %03d%%CuR, %sCu/", seqNum, (double)maxGens/1000000, popsize, sdaStates, maxMuts,
-                       tournSize, crossoverOp, (int)(crossoverRate*100), (int)(mutationRate * 100),
-                       (int)(cullingRate * 100), (randomCulling ? "R" : "W"));
+    sprintf(pathToOut, "./AAMTestOut/AAMatch on Seq%d with %.1fmilMMEs, %04dPS, %02dSt, %dMNM, %dTS, %sCO, %03d%%CrR,"
+                       " %03d%%MR, %03d%%CuR, %sCu/", seqNum, (double) maxGens / 1000000, popsize, sdaStates, maxMuts,
+            tournSize, (crossoverOp == 0 ? "2Pt" : "1St"), (int) (crossoverRate * 100), (int) (mutationRate * 100),
+            (int) (cullingRate * 100), (randomCulling ? "Rand" : "Worst"));
     mkdir(pathToOut, 0777);
     sprintf(filename, "%sCrossover Checks/", pathToOut);
     mkdir(filename, 0777);
@@ -40,23 +64,25 @@ int main(int argc, char *argv[]) {
         mutateFile.open(filename, ios::out);
         mutateCheck(mutateFile);
         mutateFile.close();
-        sprintf(filename, "%s/SDA Checks/sda%02d_%05dk.dat", pathToOut, run, 0);
-        sdaFile.open(filename, ios::out);
-        sdaCheck(sdaFile);
-        sdaFile.close();
-        cout << "Initial Checks Complete!" << endl;
 
+
+        cout << "Initial Checks Complete!" << endl;
+        sprintf(filename, "%s/SDA Checks/pop%02d.dat", pathToOut, run);
+        sdaFile.open(filename, ios::out);
         sprintf(filename, "%srun%02d.dat", pathToOut, run);
         runStats.open(filename, ios::out);
+        sprintf(filename, "%sgains%02d.dat", pathToOut, run);
+        runGains.open(filename, ios::out);
+
         printExpStatsHeader(cout);
         printExpStatsHeader(runStats);
+        sdaCheck(sdaFile, 0);
         report(runStats, run, 0, BIGGER_BETTER);
-
         int gen = 1;
         int stallCount = 0;
         double best = (BIGGER_BETTER ? 0 : MAXFLOAT);
         while (gen <= maxGens && stallCount < TERM_CRIT) {
-            matingEvent(BIGGER_BETTER);
+            matingEvent(BIGGER_BETTER, gen, runGains);
 
             if (gen % REPORT_EVERY == 0) {
                 tmp = report(runStats, run, (int) gen / (REPORT_EVERY), BIGGER_BETTER);
@@ -69,18 +95,15 @@ int main(int argc, char *argv[]) {
             }
 
             if (gen % (int) (CULLING_EVERY * REPORT_EVERY) == 0 && stallCount < TERM_CRIT) {
-                sprintf(filename, "%s/Crossover Checks/crossover%02d_%05dk.dat", pathToOut, run, gen/1000);
+                sprintf(filename, "%s/Crossover Checks/crossover%02d_%05dk.dat", pathToOut, run, gen / 1000);
                 crossFile.open(filename, ios::out);
                 crossoverCheck(crossFile);
                 crossFile.close();
-                sprintf(filename, "%s/Mutate Checks/mutate%02d_%05dk.dat", pathToOut, run, gen/1000);
+                sprintf(filename, "%s/Mutate Checks/mutate%02d_%05dk.dat", pathToOut, run, gen / 1000);
                 mutateFile.open(filename, ios::out);
                 mutateCheck(mutateFile);
                 mutateFile.close();
-                sprintf(filename, "%s/SDA Checks/sda%02d_%05dk.dat", pathToOut, run, gen/1000);
-                sdaFile.open(filename, ios::out);
-                sdaCheck(sdaFile);
-                sdaFile.close();
+                sdaCheck(sdaFile, gen);
                 culling(cullingRate, randomCulling, BIGGER_BETTER);
             }
             gen++;
@@ -93,18 +116,17 @@ int main(int argc, char *argv[]) {
         }
         bests.push_back(fits[tmp]);
         runStats.close();
+        runGains.close();
 
-        sprintf(filename, "%s/Crossover Checks/crossover%02d_%05dk.dat", pathToOut, run, (gen - 1)/1000);
+        sprintf(filename, "%s/Crossover Checks/crossover%02d_%05dk.dat", pathToOut, run, (gen - 1) / 1000);
         crossFile.open(filename, ios::out);
         crossoverCheck(crossFile);
         crossFile.close();
-        sprintf(filename, "%s/Mutate Checks/mutate%02d_%05dk.dat", pathToOut, run, (gen - 1)/1000);
+        sprintf(filename, "%s/Mutate Checks/mutate%02d_%05dk.dat", pathToOut, run, (gen - 1) / 1000);
         mutateFile.open(filename, ios::out);
         mutateCheck(mutateFile);
         mutateFile.close();
-        sprintf(filename, "%s/SDA Checks/sda%02d_%05dk.dat", pathToOut, run, (gen - 1)/1000);
-        sdaFile.open(filename, ios::out);
-        sdaCheck(sdaFile);
+        sdaCheck(sdaFile, gen);
         sdaFile.close();
         cout << "Final Checks Complete!" << endl;
     }
