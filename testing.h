@@ -2,6 +2,18 @@
 
 #define mateTests (int) 100
 
+int updateMutSpread(int dmo){
+
+if(dmo == 1){
+
+}else if(dmo == 2){
+
+}else{
+
+}
+}// updateMutSpread
+
+
 int matingEvent(bool biggerBetter, int currentGen, ostream &outp) {
     int numMuts;
     SDA child1a, child2a, child1b, child2b;
