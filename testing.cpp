@@ -67,6 +67,7 @@ int main(int argc, char *argv[]) {
         int gen = 1;
         int stallCount = 0;
         double best = (BIGGER_BETTER ? 0 : MAXFLOAT);
+        
         while (gen <= maxGens && stallCount < TERM_CRIT) {
             matingEvent(BIGGER_BETTER, gen, runGains);
 
@@ -76,9 +77,13 @@ int main(int argc, char *argv[]) {
                     best = tmp;
                     stallCount = 0;
                 } else {
-                    stallCount++;0
+                    stallCount++;// why was there a 0 on the wrong side of the colon
                 }
+
+                // insert code to dynamically change the spread of mutations (transition/response)!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                if(dynamicMutOperator != 0) updateMutSpread(dynamicMutOperator);
             }
+
 
             if (gen % (int) (CULLING_EVERY * REPORT_EVERY) == 0 && stallCount < TERM_CRIT) {
                 sprintf(filename, "%s/Crossover Checks/crossover%02d_%05dk.dat", pathToOut, run, gen / 1000);

@@ -2,18 +2,51 @@
 
 #define mateTests (int) 100
 
-int updateMutSpread(int dmo) {
+/**
+ * This method updates the numTransMuts and numRespMuts through out the GA process
+ * utilizing dynamic methods to increase and decrease the number of mutation being perfomred during a set of mating events
+*/
 
-    if (dmo == 1) {
+int updateMutSpread(int dmo){
+    if (dmo == 1){ // increase number of transition mutations & decrease number of response mutations
+        if (numTransMuts <= 50) numTransMuts++;
+        if (numRespMuts >= 0) numRespMuts--;
+    }
+    else if (dmo == 2){ // increase number of response mutations & decrease number of trasnsition mutations
+        if (numRespMuts <= 50) numRespMuts++;
+        if (numTransMuts >= 0) numTransMuts--;
+    }
+    else{// alter the variables based on fitness improvment
+        double change = populationBestFit - prevBestFitness; // calculate amount of change between previous and current best fitness
+        change = change / prevBestFitness;// calculate percentage increase from previous best fitness
 
-    } else if (dmo == 2) {
-
-    } else {
-
+        if (dmo == 3){
+            if (change == 0){ // if change equlas zero increase explorative ability of the GA
+                numRespMuts += 2;
+                numTransMuts += 2;
+            }
+            else if (numRespMuts - 2 > 0 && numTransMuts - 2 > 0){ // if there was a change, decrease the amount of exploration and increase the amount of exploitation
+                numRespMuts -= 2;
+                numTransMuts -= 2;
+            }
+        }
+        else{
+            if (prevBestFitness != populationBestFit) RICounter = 0;// if there is a change in the best fitness value reset counter
+            else RICounter++;// else increase reporting interval counter
+            if(RICounter != 0){// add the report interval counter to number of mutations performed to increase exploration
+                if(numRespMuts + RICounter < 50)numRespMuts += RICounter;
+                else numRespMuts = 50;// place a cap on the number of mutations that can be performed
+                if(numTransMuts + RICounter < 50)numTransMuts += RICounter;
+                else numTransMuts = 50;// place cap on the number of mutations that can be performed
+            }else{// reset the number of mutations to allow for exploration of the improvement
+                numRespMuts = 2;
+                numTransMuts = 2;
+            }
+        }
+        prevBestFitness = populationBestFit; // update the previous best population fitness value
     }
     return 0;
-}// updateMutSpread
-
+} // updateMutSpread
 
 int matingEvent(bool biggerBetter, int currentGen, ostream &outp) {
     SDA child1a, child2a, child1b, child2b;
