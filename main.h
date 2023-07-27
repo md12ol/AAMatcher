@@ -33,7 +33,9 @@ double mutationRate;
 double cullingRate;
 bool randomCulling;
 int populationBestIdx;
-double populationBestFit;
+double populationBestFit;// current best population fitness
+double prevBestFitness = 0;
+int RICounter;// Report Interval counter
 
 vector<int> goalSeq;
 vector<int> testSeq;
@@ -142,6 +144,7 @@ int getArgs(char *arguments[]) {
 int initAlg(const string &pathToSeqs) {
     srand48(time(nullptr)); // use system time as random number seed
     srand48(seed);           // read the random number seed
+    //vector<vector<int>> sequences = getSequences(pathToSeqs);
     goalSeq = getSequences(pathToSeqs)[seqNum];
     seqLen = (int) goalSeq.size();
     fits.reserve(popsize);

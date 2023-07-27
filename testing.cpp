@@ -77,11 +77,11 @@ int main(int argc, char *argv[]) {
                     best = tmp;
                     stallCount = 0;
                 } else {
-                    stallCount++;0
+                    stallCount++;// why was there a 0 on the wrong side of the colon
                 }
 
                 // insert code to dynamically change the spread of mutations (transition/response)!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                //if(dynamicMutOperator != 0) updateMutSpread(dynamicMutOperator);
+                if(dynamicMutOperator != 0) updateMutSpread(dynamicMutOperator);
             }
 
 
