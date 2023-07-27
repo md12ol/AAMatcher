@@ -2,22 +2,23 @@
 
 #define mateTests (int) 100
 
-int updateMutSpread(int dmo){
+int updateMutSpread(int dmo) {
 
-if(dmo == 1){
+    if (dmo == 1) {
 
-}else if(dmo == 2){
+    } else if (dmo == 2) {
 
-}else{
+    } else {
 
-}
+    }
+    return 0;
 }// updateMutSpread
 
 
 int matingEvent(bool biggerBetter, int currentGen, ostream &outp) {
-    int numMuts;
     SDA child1a, child2a, child1b, child2b;
     double fit1a, fit2a, fit1b, fit2b;
+    bool improvement = false;
 
     vector<int> idxs = tournSelect(tournSize, biggerBetter);
 
@@ -34,8 +35,9 @@ int matingEvent(bool biggerBetter, int currentGen, ostream &outp) {
         // If there is an improvement...
         if (((fit1a > populationBestFit && BIGGER_BETTER) || (fit2a > populationBestFit && BIGGER_BETTER)) ||
             ((fit1a < populationBestFit && !BIGGER_BETTER) || (fit2a < populationBestFit && !BIGGER_BETTER))) {
+            improvement = true;
             outp << "Crossover Improvement during Mating Event " << currentGen << endl;
-            if (BIGGER_BETTER){
+            if (BIGGER_BETTER) {
                 outp << populationBestFit << " -> " << max(fit1a, fit2a) << endl;
             } else {
                 outp << populationBestFit << " -> " << min(fit1a, fit2a) << endl;
@@ -71,8 +73,9 @@ int matingEvent(bool biggerBetter, int currentGen, ostream &outp) {
         // If there is an improvement...
         if (((fit1b > populationBestFit && BIGGER_BETTER) || (fit2b > populationBestFit && BIGGER_BETTER)) ||
             ((fit1b < populationBestFit && !BIGGER_BETTER) || (fit2b < populationBestFit && !BIGGER_BETTER))) {
+            improvement = true;
             outp << "Mutation Improvement during Mating Event " << currentGen << endl;
-            if (BIGGER_BETTER){
+            if (BIGGER_BETTER) {
                 outp << populationBestFit << " -> " << max(fit1b, fit2b) << endl;
             } else {
                 outp << populationBestFit << " -> " << min(fit1b, fit2b) << endl;
@@ -93,12 +96,28 @@ int matingEvent(bool biggerBetter, int currentGen, ostream &outp) {
             }
         }
     }
+    if (improvement){
+        if (fit1a > fit1b){
+            pop[idxs.end()[-1]] = child1b;
+            fits[idxs.end()[-1]] = fit1b;
+        } else {
+            pop[idxs.end()[-1]] = child1a;
+            fits[idxs.end()[-1]] = fit1a;
+        }
+        if (fit2a > fit2b){
+            pop[idxs.end()[-2]] = child2b;
+            fits[idxs.end()[-2]] = fit2b;
+        } else {
+            pop[idxs.end()[-2]] = child2a;
+            fits[idxs.end()[-2]] = fit2a;
+        }
+    } else {
+        pop[idxs.end()[-1]] = child1b;
+        pop[idxs.end()[-2]] = child2b;
 
-    pop[idxs.end()[-1]] = child1b;
-    pop[idxs.end()[-2]] = child2b;
-
-    fits[idxs.end()[-1]] = fit1b;
-    fits[idxs.end()[-2]] = fit2b;
+        fits[idxs.end()[-1]] = fit1b;
+        fits[idxs.end()[-2]] = fit2b;
+    }
     return 0;
 }
 
@@ -122,13 +141,11 @@ vector<int> runMultiCross(int numEvents, SDA mom, SDA dad) {
 vector<int> runMultiMutate(int numEvents, SDA parent) {
     SDA child;
     vector<int> fitVals;
-    int numMuts;
 
     fitVals.reserve(numEvents);
     for (int i = 0; i < numEvents; ++i) {
         child.copy(parent);
-        numMuts = (int) lrand48() % maxMuts + 1;
-        child.mutate(numMuts);
+        child.mutate(numTransMuts, numRespMuts);
         fitVals.push_back((int) fitness(child));
     }
     return fitVals;
@@ -171,7 +188,7 @@ int mutateCheck(ofstream &outStream) {
 }
 
 int sdaCheck(ofstream &outStream, int currentGen) {
-    outStream << "Population After " << currentGen << " Mating Events"<< endl;
+    outStream << "Population After " << currentGen << " Mating Events" << endl;
 
     for (int sda = 0; sda < popsize; sda++) {
         outStream << "SDA " << sda << endl;
