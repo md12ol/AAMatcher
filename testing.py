@@ -1,15 +1,11 @@
 import copy
-import gc
 import os
-from typing import List
 
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
-import numpy as np
+from graphviz import Digraph
 from matplotlib.legend_handler import HandlerTuple
 from matplotlib.patches import Patch
-from graphviz import Graph, Digraph
-
 
 # inp = "../../Conferences and Papers/2023 CIBCB/AAMatcher/AAMOut/"
 inp = "./AAMTestOut/"
@@ -19,6 +15,7 @@ finame2 = "crossover01_end.dat"
 samps = 200  # 2 for each 100 tests
 precision = 6
 col_width = 8 + precision
+reporting_interval = 10000
 
 
 def process_readme(filename: str):
@@ -37,12 +34,22 @@ def process_readme(filename: str):
             if line.__contains__("Crossover Operator"):
                 crossOp = str(line.rstrip().split(":")[1].strip())
                 pass
-            if line.__contains__("Maximum Number of Mutations"):
-                maxMuts = int(line.rstrip().split(":")[1].strip())
+            if line.__contains__("Default Number of Transition Mutations"):
+                numTransMuts = int(line.rstrip().split(":")[1].strip())
+                pass
+            if line.__contains__("Default Number of Response Mutations"):
+                numRespMuts = int(line.rstrip().split(":")[1].strip())
+                pass
+            if line.__contains__("Number of Mutations"):
+                if line.__contains__("Static"):
+                    mutChange = "Static"
+                else:
+                    mutChange = "Dynamic " + str(int(line.rstrip().split(":")[1].strip()))
+                    pass
                 pass
             pass
         pass
-    return popsize, sda_states, sda_chars, crossOp, maxMuts
+    return popsize, sda_states, sda_chars, crossOp, numTransMuts, numRespMuts, mutChange
 
 
 def process_exp(filename: str, sda_states: int, sda_chars: int) -> []:
@@ -58,7 +65,7 @@ def process_exp(filename: str, sda_states: int, sda_chars: int) -> []:
     return fits
 
 
-def get_sda(lines: List[str], sda_states: int, sda_chars: int):
+def get_sda(lines: list[str], sda_states: int, sda_chars: int):
     init_state = int(lines[0].rstrip().split("<")[0].rstrip())
     init_char = int(lines[0].rstrip().split("-")[1].strip())
     lines = lines[1:]
@@ -81,29 +88,26 @@ def get_sda(lines: List[str], sda_states: int, sda_chars: int):
     return init_state, init_char, sda_trans, sda_resps
 
 
-def process_sda(filename: str, sda_states: int, sda_chars: int):
+def process_sda(batch: list, sda_states: int, sda_chars: int):
     sdas, outputs, fits = [], [], []
     one_sda = []
-    with open(filename, "r") as f:
-        lines = f.readlines()[1:]
-        for line in lines:
-            if line.__contains__("SDA"):
-                fit_start = True
-                pass
-            elif fit_start:
-                fit_start = False
-                sda_start = True
-                fits.append(int(line))
-                pass
-            elif sda_start and not line.__contains__("-"):
-                sda_start = False
-                line = line.rstrip().split(" ")
-                outputs.append(line)
-                sdas.append(get_sda(one_sda, sda_states, sda_chars))
-                one_sda = []
-            elif sda_start:
-                one_sda.append(str(line))
-                pass
+    for line in batch:
+        if line.__contains__("SDA"):
+            fit_start = True
+            pass
+        elif fit_start:
+            fit_start = False
+            sda_start = True
+            fits.append(int(line.rstrip().split(": ")[1]))
+            pass
+        elif sda_start and not line.__contains__("-"):
+            sda_start = False
+            line = line.rstrip().split(" ")
+            outputs.append(line)
+            sdas.append(get_sda(one_sda, sda_states, sda_chars))
+            one_sda = []
+        elif sda_start:
+            one_sda.append(str(line))
             pass
         pass
     return sdas, outputs, fits
@@ -186,7 +190,7 @@ def get_data(filename: str, popsize: int, both: bool):
 
 
 def make_boxplot(data: [], fits: [], parent_diff: [], first_parent: int, out_path: str, run: int, num_gens: int,
-                 popsize: int, metadata: List):
+                 popsize: int, metadata: list):
     data = copy.deepcopy(data)
     plt.style.use("seaborn-v0_8")
     plt.rc('xtick', labelsize=10)
@@ -319,8 +323,8 @@ def make_graph(el: [], out_file: str, verts: int):
     g.edge_attr.update(color='black', penwidth='0.25', fixedsize='true', arrowsize='0.2')
 
     for n in range(verts):
-        x = (n % 5)*50
-        y = int(n / 5)*50
+        x = (n % 5) * 50
+        y = int(n / 5) * 50
         if n == 0:
             g.node(str(n), label=str(n), color='red', pos=str(str(x) + "," + str(y) + "!"))
             pass
@@ -338,9 +342,116 @@ def make_graph(el: [], out_file: str, verts: int):
     pass
 
 
+def make_convergence_plot(folder: str, run_num: int, out_path):
+    means = []
+    bests = []
+    with open(folder + "run" + str(run_num).zfill(2) + ".dat") as f:
+        lines = f.readlines()
+        for line in lines[1:]:
+            means.append(float(line.split()[2]))
+            bests.append(int(line.split()[5]))
+            pass
+        pass
+
+    crosses = []
+    muts = []
+
+    with open(folder + "gains" + str(run_num).zfill(2) + ".dat") as f:
+        lines = f.readlines()
+        for num, line in enumerate(lines):
+            if line.__contains__("Crossover"):
+                crosses.append([int(lines[num].rstrip().split(" ")[-1]), int(lines[num + 1].rstrip().split(" ")[-1])])
+                pass
+            if line.__contains__("Mutation"):
+                muts.append([int(lines[num].rstrip().split(" ")[-1]), int(lines[num + 1].rstrip().split(" ")[-1])])
+                pass
+            pass
+        pass
+
+    print(crosses)
+    print(muts)
+
+    out_path = out_path + "Run" + str(run_num).zfill(2)
+    if not os.path.exists(out_path):
+        os.makedirs(out_path)
+        pass
+    out_path += "/Convergence" + str(run_num).zfill(2)
+
+    plt.style.use("seaborn-v0_8")
+    plt.rc('xtick', labelsize=10)
+    plt.rc('ytick', labelsize=10)
+
+    f = plt.figure()
+    f.set_figheight(4.5)
+    f.set_figwidth(10)
+    plot = f.add_subplot(111)
+
+    xs = [i for i in range(0, 100001, 10000)]
+
+    cross_x = []
+    cross_y = []
+    for cr in crosses:
+        cross_x.append(cr[0])
+        cross_y.append(cr[1])
+        pass
+
+    muts_x = []
+    muts_y = []
+    for m in muts:
+        muts_x.append(m[0])
+        muts_y.append(m[1])
+        pass
+
+    plot.scatter(cross_x, cross_y, label="Crossover Improvements", marker='*', color='red')
+    plot.scatter(muts_x, muts_y, label="Mutation Improvements", marker='+', color='green')
+    plot.plot(xs, means, label="Mean Population Fitness", color='cyan')
+    plot.plot(xs, bests, label="Best Population Fitness", color='blue')
+    plot.set_xlabel("Mating Event", fontsize=12)
+    plot.set_ylabel("Fitness", fontsize=12)
+    f.suptitle("Convergence for Run " + str(run_num), fontsize=14)
+    plot.legend(facecolor='white', frameon='true', fontsize=12, framealpha=0.75,
+                loc='lower right', ncol=2, borderaxespad=0.1)
+    f.subplots_adjust(bottom=0.11, top=0.93, left=0.05, right=0.99)
+    f.savefig(out_path + ".png", dpi=500)
+    pass
+
+
+def make_heatmap(sda_infos: list, num_states, num_chars, out_path , num_gens, run_num):
+    count = [[0 for _ in range(num_states)] for _ in range(num_states * num_chars)]
+    for sda in sda_infos:
+        transitions = sda[2]
+        for st,trans in enumerate(transitions):
+            for ch, tr in enumerate(trans):
+                row = num_chars * st + ch
+                col = tr
+                count[row][col] += 1
+                pass
+            pass
+        pass
+
+    out_path = out_path + "Run" + str(run_num).zfill(2) + "/"
+    if not os.path.exists(out_path):
+        os.makedirs(out_path)
+        pass
+
+    f = plt.figure()
+    f.set_figheight(5)
+    f.set_figwidth(5)
+    plot = f.add_subplot(111)
+    plot.imshow(count, aspect='auto')
+    plot.set_yticks([x * num_chars + int(num_chars/2) - 0.5 for x in range(num_states)], (x + 1 for x in range(num_states)))
+    plot.set_xticks([y for y in range(num_states)], (y + 1 for y in range(num_states)))
+    for y in range(3, 4*num_states, 4):
+        plot.axhline(y=y+0.5, color="#000000", linestyle="-", linewidth="1")
+        pass
+    f.subplots_adjust(bottom=0.11, top=0.93, left=0.05, right=0.99)
+    f.savefig(out_path + "trans_heatmap" + str(num_gens).zfill(8) + ".png", dpi=500)
+    return count
+
+
 def main():
     folder_names = os.listdir(inp)
-    print_every = 100000
+    print_every = 50000
 
     for fold in folder_names:
         out_path = outp + fold
@@ -349,118 +460,132 @@ def main():
             pass
         out_path += "/"
 
-        popsize, sda_states, sda_chars, crossOp, maxMuts= process_readme(inp + fold + "/read.me")
+        popsize, sda_states, sda_chars, crossOp, trans_muts, resp_muts, dynamic_muts = process_readme(
+            inp + fold + "/read.me")
         best_run, init_state, init_char, sda_trans, sda_resps = process_best(inp + fold + "/best.dat",
                                                                              sda_states, sda_chars)
         process_exp(inp + fold + "/exp.dat", sda_states, sda_chars)
 
-        all_crossover_files = os.listdir(inp + fold + "/Crossover Checks/")
-        best_run_crossover_files = []
-        for file in all_crossover_files:
-            if file.__contains__("crossover" + str(best_run).zfill(2)):
-                best_run_crossover_files.append(file)
-                pass
-            pass
+        # all_crossover_files = os.listdir(inp + fold + "/Crossover Checks/")
+        # best_run_crossover_files = []
+        # for file in all_crossover_files:
+        #     if file.__contains__("crossover" + str(best_run).zfill(2)):
+        #         best_run_crossover_files.append(file)
+        #         pass
+        #     pass
+        #
+        # datasets = []
+        # for file in best_run_crossover_files:
+        #     child_fits_for_parents, parent_fits = get_data(inp + fold + "/Crossover Checks/" + file, popsize, True)
+        #     # child_fits[mom][dad] = list of all children generated from 100 crossovers
+        #     # parent_fits[parent_idx] = fitness value assigned to parent with index parent_idx
+        #     datasets.append([child_fits_for_parents, parent_fits])
+        #     pass
+        #
+        # # ds = [child_fits[], parent_fits[]] at one point of evolution
+        # for idx, ds in enumerate(datasets):  # for each report
+        #     num_gens = int(best_run_crossover_files[idx].rstrip().split("_")[1].split("k")[0]) * 1000
+        #     all_children_fits_for_parent = []
+        #     # all_parent_means[idx] = the values representing parents mean fitness - children's mean fitness
+        #     all_couple_means = [[] for _ in range(popsize)]
+        #
+        #     for mom in range(popsize):
+        #         one_parent_means = []
+        #         for dad in range(popsize):
+        #             if mom == dad:
+        #                 one_parent_means.append(0)
+        #             else:
+        #                 parent_mean = (ds[1][mom] + ds[1][dad]) / 2
+        #                 child_mean = np.mean(ds[0][mom][dad])
+        #                 one_parent_means.append(child_mean - parent_mean)
+        #                 pass
+        #             pass
+        #         all_couple_means[mom] = one_parent_means
+        #         pass
+        #
+        #     for parent_idx, child_fits_for_parents in enumerate(ds[0]):
+        #         if num_gens % print_every == 0:
+        #             make_boxplot(child_fits_for_parents, ds[1], all_couple_means[parent_idx], parent_idx, out_path,
+        #                          best_run, num_gens, popsize, [crossOp, "Crossover"])
+        #             pass
+        #         holder = []
+        #         for vals in child_fits_for_parents:
+        #             holder.extend(vals)
+        #             pass
+        #         all_children_fits_for_parent.append(holder)
+        #         pass
+        #
+        #     if num_gens % print_every == 0:
+        #         mean_diff = [np.mean(all_children_fits_for_parent[i]) - ds[1][i] for i in range(popsize)]
+        #         make_boxplot(all_children_fits_for_parent, ds[1], mean_diff, -1, out_path, best_run, num_gens, popsize,
+        #                      [crossOp, "Crossover"])
+        #         pass
+        #     pass
+        #
+        # all_mutation_files = os.listdir(inp + fold + "/Mutate Checks/")
+        # best_run_mutation_files = []
+        # for file in all_mutation_files:
+        #     if file.__contains__("mutate" + str(best_run).zfill(2)):
+        #         best_run_mutation_files.append(file)
+        #         pass
+        #     pass
+        #
+        # datasets = []
+        # for file in best_run_mutation_files:
+        #     child_fits_for_parents, parent_fits = get_data(inp + fold + "/Mutate Checks/" + file, popsize, False)
+        #     datasets.append([child_fits_for_parents, parent_fits])
+        #     pass
+        #
+        # for idx, ds in enumerate(datasets):
+        #     num_gens = int(best_run_mutation_files[idx].rstrip().split("_")[1].split("k")[0]) * 1000
+        #
+        #     parent_child_diff = []
+        #     for mom in range(popsize):
+        #         parent_fit = ds[1][mom]
+        #         child_mean = np.mean(ds[0][mom])
+        #         parent_child_diff.append(child_mean - parent_fit)
+        #         pass
+        #
+        #     if num_gens % print_every == 0:
+        #         make_boxplot(ds[0], ds[1], parent_child_diff, -2, out_path, best_run, num_gens, popsize,
+        #                      ["Sets of " + str(trans_muts) + ", " + str(resp_muts) + " Mutations", "Mutation"])
+        #         pass
+        #     pass
+        #
 
-        datasets = []
-        for file in best_run_crossover_files:
-            child_fits_for_parent, parent_fits = get_data(inp + fold + "/Crossover Checks/" + file, popsize, True)
-            # child_fits[mom][dad] = list of all children generated from 100 crossovers
-            # parent_fits[parent_idx] = fitness value assigned to parent with index parent_idx
-            datasets.append([child_fits_for_parent, parent_fits])
-            pass
-
-        # ds = [child_fits[], parent_fits[]] at one point of evolution
-        for idx, ds in enumerate(datasets):  # for each report
-            num_gens = int(best_run_crossover_files[idx].rstrip().split("_")[1].split("k")[0]) * 1000
-            all_children_fits_for_parent = []
-            # all_parent_means[idx] = the values representing parents mean fitness - children's mean fitness
-            all_couple_means = [[] for _ in range(popsize)]
-
-            for mom in range(popsize):
-                one_parent_means = []
-                for dad in range(popsize):
-                    if mom == dad:
-                        one_parent_means.append(0)
-                    else:
-                        parent_mean = (ds[1][mom] + ds[1][dad]) / 2
-                        child_mean = np.mean(ds[0][mom][dad])
-                        one_parent_means.append(child_mean - parent_mean)
+        best_sda_check_file = inp + fold + "/SDA Checks/pop" + str(best_run).zfill(2) + ".dat"
+        sda_batches = []
+        with open(best_sda_check_file) as f:
+            lines = f.readlines()
+            batch = []
+            for line in lines:
+                if line.__contains__("Population After"):
+                    if len(batch) > 0:
+                        sda_batches.append(batch)
+                        batch = []
                         pass
                     pass
-                all_couple_means[mom] = one_parent_means
-                pass
-
-            for parent_idx, child_fits_for_parent in enumerate(ds[0]):
-                if num_gens % print_every == 0:
-                    make_boxplot(child_fits_for_parent, ds[1], all_couple_means[parent_idx], parent_idx, out_path,
-                                 best_run,
-                                 num_gens, popsize, [crossOp, "Crossover"])
+                else:
+                    batch.append(line)
                     pass
-                holder = []
-                for vals in child_fits_for_parent:
-                    holder.extend(vals)
-                    pass
-                all_children_fits_for_parent.append(holder)
                 pass
+            pass
 
+        # sda_infos[sda] = init_state, init_char, sda_trans, sda_resps
+        for idx, batch in enumerate(sda_batches):
+            num_gens = idx * reporting_interval
+            sda_infos, sda_outputs, sda_fits = process_sda(batch, sda_states, sda_chars)
             if num_gens % print_every == 0:
-                mean_diff = [np.mean(all_children_fits_for_parent[i]) - ds[1][i] for i in range(popsize)]
-                make_boxplot(all_children_fits_for_parent, ds[1], mean_diff, -1, out_path, best_run, num_gens, popsize,
-                             [crossOp, "Crossover"])
-                pass
-            pass
-
-        all_mutation_files = os.listdir(inp + fold + "/Mutate Checks/")
-        best_run_mutation_files = []
-        for file in all_mutation_files:
-            if file.__contains__("mutate" + str(best_run).zfill(2)):
-                best_run_mutation_files.append(file)
-                pass
-            pass
-
-        datasets = []
-        for file in best_run_mutation_files:
-            child_fits_for_parent, parent_fits = get_data(inp + fold + "/Mutate Checks/" + file, popsize, False)
-            datasets.append([child_fits_for_parent, parent_fits])
-            pass
-
-        for idx, ds in enumerate(datasets):
-            num_gens = int(best_run_mutation_files[idx].rstrip().split("_")[1].split("k")[0]) * 1000
-
-            parent_child_diff = []
-            for mom in range(popsize):
-                parent_fit = ds[1][mom]
-                child_mean = np.mean(ds[0][mom])
-                parent_child_diff.append(child_mean - parent_fit)
-                pass
-
-            if num_gens % print_every == 0:
-                make_boxplot(ds[0], ds[1], parent_child_diff, -2, out_path, best_run, num_gens, popsize,
-                             ["Sets of Max-" + str(maxMuts) + " Mutation", "Mutation"])
-                pass
-            pass
-
-        all_sda_checks_files = os.listdir(inp + fold + "/SDA Checks/")
-        best_sda_checks_files = []
-        for file in all_sda_checks_files:
-            if file.__contains__("sda" + str(best_run).zfill(2)):
-                best_sda_checks_files.append(file)
-                pass
-            pass
-
-        # sda_infos = [init_state, init_char, sda_trans, sda_resps]
-        for idx, file in enumerate(best_sda_checks_files):
-            num_gens = int(best_sda_checks_files[idx].rstrip().split("_")[1].split("k")[0]) * 1000
-            sda_infos, sda_outputs, sda_fits = process_sda(inp + fold + "/SDA Checks/" + file, sda_states, sda_chars)
-            if num_gens % print_every == 0:
-                gc.collect()
                 for sda_idx, inf in enumerate(sda_infos):
                     make_graph(edge_list(inf[2], sda_states), fold + "/Run" + str(best_run).zfill(2) + "/SDA_" +
-                                str(num_gens).zfill(8) + "_" + str(sda_idx + 1).zfill(2), sda_states)
+                               str(num_gens).zfill(8) + "_" + str(sda_idx + 1).zfill(2), sda_states)
                     pass
+                make_heatmap(sda_infos, sda_states, sda_chars, out_path, num_gens, best_run)
                 pass
             pass
+
+        make_convergence_plot(inp + fold + "/", best_run, out_path)
+
 
     print("DONE")
     pass

@@ -21,9 +21,12 @@ int main(int argc, char *argv[]) {
 
     initAlg(pathToSeqs);
     cmdLineIntro(cout);
-    sprintf(pathToOut, "./AAMTestOut/AAMatch on Seq%d with %.1fmilMMEs, %04dPS, %02dSt, %dMNM, %dTS, %sCO, %03d%%CrR,"
-                       " %03d%%MR, %03d%%CuR, %sCu/", seqNum, (double) maxGens / 1000000, popsize, sdaStates, maxMuts,
-            tournSize, (crossoverOp == 0 ? "2Pt" : "1St"), (int) (crossoverRate * 100), (int) (mutationRate * 100),
+    char dynamicMessage[20];
+    sprintf(dynamicMessage, "%s%d", (dynamicMutOperator == 0 ? "Static" : "Dynamic"), dynamicMutOperator);
+    sprintf(pathToOut, "./AAMTestOut/AAMatch on Seq%d with %.1fmilMMEs, %04dPS, %02dSt, %02dNTM, %02dNRM, %s,"
+                       " %dTS, %sCO, %03d%%CrR, %03d%%MR, %03d%%CuR, %sCu/", seqNum, (double) maxGens / 1000000,
+            popsize, sdaStates, numTransMuts, numRespMuts, dynamicMessage, tournSize,
+            (crossoverOp == 0 ? "2Pt" : "1St"), (int) (crossoverRate * 100), (int) (mutationRate * 100),
             (int) (cullingRate * 100), (randomCulling ? "Rand" : "Worst"));
     mkdir(pathToOut, 0777);
     sprintf(filename, "%sCrossover Checks/", pathToOut);
@@ -74,7 +77,7 @@ int main(int argc, char *argv[]) {
                     best = tmp;
                     stallCount = 0;
                 } else {
-                    stallCount++;
+                    stallCount++;0
                 }
 
                 // insert code to dynamically change the spread of mutations (transition/response)!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -92,7 +95,9 @@ int main(int argc, char *argv[]) {
                 mutateCheck(mutateFile);
                 mutateFile.close();
                 sdaCheck(sdaFile, gen);
-                culling(cullingRate, randomCulling, BIGGER_BETTER);
+                if (gen != maxGens){
+                    culling(cullingRate, randomCulling, BIGGER_BETTER);
+                }
             }
             gen++;
         }

@@ -204,8 +204,14 @@ int makeReadMe(ostream &outp) {
     outp << "Tournament Size: " << tournSize << endl;
     outp << "Crossover Operator: " << (crossoverOp == 0 ? "Two-Point Crossover" : "One-State Crossover") << endl;
     outp << "Crossover Rate: " << (int) (crossoverRate * 100) << "%" << endl;
-//    outp << "Maximum Number of Mutations: " << maxMuts << endl; //TODO: Update
     outp << "Mutation Rate: " << (int) (mutationRate * 100) << "%" << endl;
+    outp << "Default Number of Transition Mutations: " << numTransMuts << endl;
+    outp << "Default Number of Response Mutations: " << numRespMuts << endl;
+    if (dynamicMutOperator == 0){
+        outp << "Static Number of Mutations" << endl;
+    } else {
+        outp << "Dynamic Number of Mutations Using Version: " << dynamicMutOperator << endl;
+    }
     outp << "Culling Every: " << CULLING_EVERY * REPORT_EVERY << " generations" << endl;
     if (randomCulling) {
         outp << "Culling Winners: Random " << (int) (cullingRate * 100) << "% of the population" << endl;
