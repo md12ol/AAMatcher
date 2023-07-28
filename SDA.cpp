@@ -141,7 +141,7 @@ int SDA::copy(SDA &other) {
     return 0;
 }
 
-int SDA::twoPointCrossover(SDA &other) {
+int SDA::twoPointCrossover(SDA &other, int firstCP, int secondCP) {
     if (initChar < 0) {
         cout << "Error in SDA Class: twoPointCrossover(...): this SDA has not been initialized.";
         return -1;
@@ -167,15 +167,20 @@ int SDA::twoPointCrossover(SDA &other) {
     vector<int> swapVec;
     swapVec.reserve(numChars);
 
-    do {
-        crossStart = (int) lrand48() % (numStates + 1);
-        crossEnd = (int) lrand48() % (numStates + 1);
-        if (crossStart > crossEnd) {
-            swapInt = crossStart;
-            crossStart = crossEnd;
-            crossEnd = swapInt;
-        }
-    } while (crossStart == crossEnd);
+    if (firstCP == -1 && secondCP == -1) {
+        do {
+            crossStart = (int) lrand48() % (numStates + 1);
+            crossEnd = (int) lrand48() % (numStates + 1);
+            if (crossStart > crossEnd) {
+                swapInt = crossStart;
+                crossStart = crossEnd;
+                crossEnd = swapInt;
+            }
+        } while (crossStart == crossEnd);
+    } else {
+        crossStart = firstCP;
+        crossEnd = secondCP;
+    }
 
     if (crossStart == 0) {
         swapInt = initChar;
@@ -271,7 +276,8 @@ int SDA::mutate(int numMuts) {
     return 0;
 }
 
-int SDA::mutate(int transMuts, int respMuts) {//!!!!!!!!!!!!!!!!!!!!!! Static version (does fixed amount of mutations for each type)
+//!!!!!!!!!!!!!!!!!!!!!! Static version (does fixed amount of mutations for each type)
+int SDA::mutate(int transMuts, int respMuts) {
     if (initChar < 0) {
         cout << "Error in SDA Class: mutate(...): this SDA has not been initialized.";
         return -1;
@@ -279,7 +285,7 @@ int SDA::mutate(int transMuts, int respMuts) {//!!!!!!!!!!!!!!!!!!!!!! Static ve
 
     if (drand48() < 0.1) { // 10% chance of mutating initial character
         initChar = (int) lrand48() % numChars;
-        }
+    }
 
     int mutPt, respSize;
     vector<int> oneResponse;
@@ -290,7 +296,7 @@ int SDA::mutate(int transMuts, int respMuts) {//!!!!!!!!!!!!!!!!!!!!!! Static ve
         transitions.at(mutPt).at(transNum) = (int) lrand48() % numStates;
     }
 
-    for(int mut = 0; mut < respMuts; ++mut){
+    for (int mut = 0; mut < respMuts; ++mut) {
         mutPt = (int) lrand48() % numStates;
         int transNum = (int) lrand48() % numChars;
         oneResponse.clear();

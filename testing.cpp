@@ -12,7 +12,7 @@ int main(int argc, char *argv[]) {
     getArgs(argv);
     string pathToSeqs = "./Sequences.dat";
     char filename[200];
-    ofstream runStats, expStats, readMe, crossFile, mutateFile, sdaFile, runGains, runPopulation;
+    ofstream runStats, expStats, readMe, crossFile, mutateFile, sdaFile, runGains, runGenes;
 
     vector<double> bests;
     bests.reserve(runs);
@@ -35,6 +35,8 @@ int main(int argc, char *argv[]) {
     mkdir(filename, 0777);
     sprintf(filename, "%sSDA Checks/", pathToOut);
     mkdir(filename, 0777);
+    sprintf(filename, "%sSDA Genes/", pathToOut);
+    mkdir(filename, 0777);
     expStats.open(string(pathToOut) + "./exp.dat", ios::out);
     readMe.open(string(pathToOut) + "./read.me", ios::out);
     makeReadMe(readMe);
@@ -51,6 +53,10 @@ int main(int argc, char *argv[]) {
         mutateFile.open(filename, ios::out);
         mutateCheck(mutateFile);
         mutateFile.close();
+        sprintf(filename, "%s/SDA Genes/genes%02d_%05dk.dat", pathToOut, run, 0);
+        runGenes.open(filename, ios::out);
+        genetic_diversity_check(runGenes);
+        runGenes.close();
 
         cout << "Initial Checks Complete!" << endl;
         sprintf(filename, "%s/SDA Checks/pop%02d.dat", pathToOut, run);
@@ -67,7 +73,7 @@ int main(int argc, char *argv[]) {
         int gen = 1;
         int stallCount = 0;
         double best = (BIGGER_BETTER ? 0 : MAXFLOAT);
-        
+
         while (gen <= maxGens && stallCount < TERM_CRIT) {
             matingEvent(BIGGER_BETTER, gen, runGains);
 
@@ -77,11 +83,11 @@ int main(int argc, char *argv[]) {
                     best = tmp;
                     stallCount = 0;
                 } else {
-                    stallCount++;// why was there a 0 on the wrong side of the colon
+                    stallCount++;
                 }
 
                 // insert code to dynamically change the spread of mutations (transition/response)!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                if(dynamicMutOperator != 0) updateMutSpread(dynamicMutOperator);
+                if (dynamicMutOperator != 0) updateMutSpread(dynamicMutOperator);
             }
 
 
@@ -94,8 +100,12 @@ int main(int argc, char *argv[]) {
                 mutateFile.open(filename, ios::out);
                 mutateCheck(mutateFile);
                 mutateFile.close();
+                sprintf(filename, "%s/SDA Genes/genes%02d_%05dk.dat", pathToOut, run, gen / 1000);
+                runGenes.open(filename, ios::out);
+                genetic_diversity_check(runGenes);
+                runGenes.close();
                 sdaCheck(sdaFile, gen);
-                if (gen != maxGens){
+                if (gen != maxGens) {
                     culling(cullingRate, randomCulling, BIGGER_BETTER);
                 }
             }
@@ -119,6 +129,10 @@ int main(int argc, char *argv[]) {
         mutateFile.open(filename, ios::out);
         mutateCheck(mutateFile);
         mutateFile.close();
+        sprintf(filename, "%s/SDA Genes/genes%02d_%05dk.dat", pathToOut, run, (gen - 1) / 1000);
+        runGenes.open(filename, ios::out);
+        genetic_diversity_check(runGenes);
+        runGenes.close();
         sdaCheck(sdaFile, gen);
         sdaFile.close();
         cout << "Final Checks Complete!" << endl;

@@ -21,6 +21,7 @@
  * 14.  Mutation Rate
  * 15.  Culling Rate
  * 16.  Random Culling
+ * 17.  Culling Every _ Reporting Intervals
  *
  * @param argc
  * @param argv
@@ -38,9 +39,12 @@ int main(int argc, char *argv[]) {
 
     initAlg(pathToSeqs);
     cmdLineIntro(cout);
-    sprintf(pathToOut, "./AAMOut/AAMatch on Seq%d with %.1fmilMMEs, %04dPS, %02dSt, %dMNM, %dTS, %sCO, %03d%%CrR,"
-                       " %03d%%MR, %03d%%CuR, %sCu/", seqNum, (double) maxGens / 1000000, popsize, sdaStates, maxMuts,
-            tournSize, (crossoverOp == 0 ? "2Pt" : "1St"), (int) (crossoverRate * 100), (int) (mutationRate * 100),
+    char dynamicMessage[20];
+    sprintf(dynamicMessage, "%s%d", (dynamicMutOperator == 0 ? "Static" : "Dynamic"), dynamicMutOperator);
+    sprintf(pathToOut, "./AAMOut/AAMatch on Seq%d with %.1fmilMMEs, %04dPS, %02dSt, %02dNTM, %02dNRM, %s,"
+                       " %dTS, %sCO, %03d%%CrR, %03d%%MR, %03d%%CuR, %sCu/", seqNum, (double) maxGens / 1000000,
+            popsize, sdaStates, numTransMuts, numRespMuts, dynamicMessage, tournSize,
+            (crossoverOp == 0 ? "2Pt" : "1St"), (int) (crossoverRate * 100), (int) (mutationRate * 100),
             (int) (cullingRate * 100), (randomCulling ? "Rand" : "Worst"));
     mkdir(pathToOut, 0777);
     expStats.open(string(pathToOut) + "./exp.dat", ios::out);

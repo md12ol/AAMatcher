@@ -11,7 +11,7 @@ using namespace std;
 // System Parameters
 #define REPORT_EVERY (int)10000
 #define TERM_CRIT 50
-#define CULLING_EVERY 1
+int CULLING_EVERY;
 #define BIGGER_BETTER (bool)true
 
 // Experiment Parameters
@@ -137,6 +137,8 @@ int getArgs(char *arguments[]) {
     cullingRate = stod(arg, &pos);
     arg = arguments[16]; // randomCulling
     randomCulling = stoi(arg, &pos) == 1;
+    arg = arguments[17];
+    CULLING_EVERY = stoi(arg, &pos);
     cout << "Arguments Captured!" << endl;
     return 0;
 }

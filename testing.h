@@ -7,38 +7,38 @@
  * utilizing dynamic methods to increase and decrease the number of mutation being perfomred during a set of mating events
 */
 
-int updateMutSpread(int dmo){
-    if (dmo == 1){ // increase number of transition mutations & decrease number of response mutations
+int updateMutSpread(int dmo) {
+    if (dmo == 1) { // increase number of transition mutations & decrease number of response mutations
         if (numTransMuts <= 50) numTransMuts++;
         if (numRespMuts >= 0) numRespMuts--;
-    }
-    else if (dmo == 2){ // increase number of response mutations & decrease number of trasnsition mutations
+    } else if (dmo == 2) { // increase number of response mutations & decrease number of trasnsition mutations
         if (numRespMuts <= 50) numRespMuts++;
         if (numTransMuts >= 0) numTransMuts--;
-    }
-    else{// alter the variables based on fitness improvment
-        double change = populationBestFit - prevBestFitness; // calculate amount of change between previous and current best fitness
+    } else {// alter the variables based on fitness improvment
+        double change = populationBestFit -
+                        prevBestFitness; // calculate amount of change between previous and current best fitness
         change = change / prevBestFitness;// calculate percentage increase from previous best fitness
 
-        if (dmo == 3){
-            if (change == 0){ // if change equlas zero increase explorative ability of the GA
+        if (dmo == 3) {
+            if (change == 0) { // if change equlas zero increase explorative ability of the GA
                 numRespMuts += 2;
                 numTransMuts += 2;
-            }
-            else if (numRespMuts - 2 > 0 && numTransMuts - 2 > 0){ // if there was a change, decrease the amount of exploration and increase the amount of exploitation
+            } else if (numRespMuts - 2 > 0 && numTransMuts - 2 >
+                                              0) { // if there was a change, decrease the amount of exploration and increase the amount of exploitation
                 numRespMuts -= 2;
                 numTransMuts -= 2;
             }
-        }
-        else{
-            if (prevBestFitness != populationBestFit) RICounter = 0;// if there is a change in the best fitness value reset counter
+        } else {
+            if (prevBestFitness != populationBestFit)
+                RICounter = 0;// if there is a change in the best fitness value reset counter
             else RICounter++;// else increase reporting interval counter
-            if(RICounter != 0){// add the report interval counter to number of mutations performed to increase exploration
-                if(numRespMuts + RICounter < 50)numRespMuts += RICounter;
+            if (RICounter !=
+                0) {// add the report interval counter to number of mutations performed to increase exploration
+                if (numRespMuts + RICounter < 50)numRespMuts += RICounter;
                 else numRespMuts = 50;// place a cap on the number of mutations that can be performed
-                if(numTransMuts + RICounter < 50)numTransMuts += RICounter;
+                if (numTransMuts + RICounter < 50)numTransMuts += RICounter;
                 else numTransMuts = 50;// place cap on the number of mutations that can be performed
-            }else{// reset the number of mutations to allow for exploration of the improvement
+            } else {// reset the number of mutations to allow for exploration of the improvement
                 numRespMuts = 2;
                 numTransMuts = 2;
             }
@@ -47,6 +47,94 @@ int updateMutSpread(int dmo){
     }
     return 0;
 } // updateMutSpread
+
+int crossover_all(ostream &outStrm, SDA &parent1, SDA &parent2){
+    SDA child1, child2;
+    int count = 1;
+    for (int cp1 = 0; cp1 <= sdaStates; cp1++){
+        for (int cp2 = cp1 + 1; cp2 <= sdaStates; cp2++){
+            child1.copy(parent1);
+            child2.copy(parent2);
+            child1.twoPointCrossover(child2, cp1, cp2);
+            outStrm << "Child " << count++ << ": " << fitness(child1) << endl;
+            child1.printSDA(outStrm);
+            child1.rtnOutput(true, outStrm);
+            outStrm << "Child " << count++ << ": " << fitness(child2) << endl;
+            child2.printSDA(outStrm);
+            child2.rtnOutput(true, outStrm);
+        }
+    }
+    return 0;
+}
+
+int genetic_diversity_check(ostream &outStrm) {
+    outStrm << "Best with Best" << endl;
+    int bestFit, secondBestFit, worstFit;
+    int bestIdx, secondBestIdx, worstIdx;
+    bestFit = (BIGGER_BETTER ? 0 : INT32_MAX);
+    secondBestFit = (BIGGER_BETTER ? 0 : INT32_MAX);
+    worstFit = (BIGGER_BETTER ? INT32_MAX : 0);
+    for (int idx = 0; idx < popsize; ++idx) {
+        if ((BIGGER_BETTER && fits[idx] > bestFit) ||(!BIGGER_BETTER && fits[idx] < bestFit)){
+            secondBestFit = bestFit;
+            secondBestIdx = bestIdx;
+            bestFit = (int)fits[idx];
+            bestIdx = idx;
+        } else if ((BIGGER_BETTER && fits[idx] > secondBestFit) ||(!BIGGER_BETTER && fits[idx] < secondBestFit)){
+            secondBestFit = (int)fits[idx];
+            secondBestIdx = idx;
+        }
+
+        if ((BIGGER_BETTER && fits[idx] < worstFit) || (!BIGGER_BETTER && fits[idx] > worstFit)){
+            worstFit = (int)fits[idx];
+            worstIdx = idx;
+        }
+    }
+
+    outStrm << "First SDA: " << bestFit<<endl;
+    pop[bestIdx].printSDA(outStrm);
+    pop[bestIdx].rtnOutput(true, outStrm);
+    outStrm << "Second SDA: " << secondBestFit << endl;
+    pop[secondBestIdx].printSDA(outStrm);
+    pop[secondBestIdx].rtnOutput(true, outStrm);
+
+    SDA parent1 = pop[bestIdx];
+    SDA parent2 = pop[secondBestIdx];
+    crossover_all(outStrm, parent1, parent2);
+
+    outStrm << "Best with Worst" << endl;
+    outStrm << "First SDA: " << bestFit<<endl;
+    pop[bestIdx].printSDA(outStrm);
+    pop[bestIdx].rtnOutput(true, outStrm);
+    outStrm << "Second SDA: " << worstFit << endl;
+    pop[worstIdx].printSDA(outStrm);
+    pop[worstIdx].rtnOutput(true, outStrm);
+
+    parent2.copy(pop[worstIdx]);
+    crossover_all(outStrm, parent1, parent2);
+
+    outStrm << "Best with Random" << endl;
+    parent2.randomize();
+    outStrm << "First SDA: " << bestFit<<endl;
+    pop[bestIdx].printSDA(outStrm);
+    pop[bestIdx].rtnOutput(true, outStrm);
+    outStrm << "Second SDA: " << fitness(parent2) << endl;
+    parent2.printSDA(outStrm);
+    parent2.rtnOutput(true, outStrm);
+    crossover_all(outStrm, parent1, parent2);
+
+    outStrm << "Worst with Random" << endl;
+    parent1.copy(pop[worstIdx]);
+    parent2.randomize();
+    outStrm << "First SDA: " << worstFit<<endl;
+    parent1.printSDA(outStrm);
+    parent1.rtnOutput(true, outStrm);
+    outStrm << "Second SDA: " << fitness(parent2) << endl;
+    parent2.printSDA(outStrm);
+    parent2.rtnOutput(true, outStrm);
+    crossover_all(outStrm, parent1, parent2);
+    return 0;
+}
 
 int matingEvent(bool biggerBetter, int currentGen, ostream &outp) {
     SDA child1a, child2a, child1b, child2b;
@@ -129,15 +217,15 @@ int matingEvent(bool biggerBetter, int currentGen, ostream &outp) {
             }
         }
     }
-    if (improvement){
-        if (fit1a > fit1b){
+    if (improvement) {
+        if (fit1a > fit1b) {
             pop[idxs.end()[-1]] = child1b;
             fits[idxs.end()[-1]] = fit1b;
         } else {
             pop[idxs.end()[-1]] = child1a;
             fits[idxs.end()[-1]] = fit1a;
         }
-        if (fit2a > fit2b){
+        if (fit2a > fit2b) {
             pop[idxs.end()[-2]] = child2b;
             fits[idxs.end()[-2]] = fit2b;
         } else {

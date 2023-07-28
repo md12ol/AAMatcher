@@ -16,7 +16,7 @@ public:
     int setOutputLen(int newLen);
     int randomize();
     int copy(SDA &other);
-    int twoPointCrossover(SDA &other);
+    int twoPointCrossover(SDA &other, int firstCP=-1, int secondCP=-1);
     int oneStateCrossover(SDA &other);
     int mutate(int numMuts);
     int mutate(int transMuts, int respMuts);

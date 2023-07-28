@@ -16,6 +16,7 @@ samps = 200  # 2 for each 100 tests
 precision = 6
 col_width = 8 + precision
 reporting_interval = 10000
+alphabet = ['G', 'C', 'A', 'T']
 
 
 def process_readme(filename: str):
@@ -99,6 +100,27 @@ def process_sda(batch: list, sda_states: int, sda_chars: int):
             fit_start = False
             sda_start = True
             fits.append(int(line.rstrip().split(": ")[1]))
+            pass
+        elif sda_start and not line.__contains__("-"):
+            sda_start = False
+            line = line.rstrip().split(" ")
+            outputs.append(line)
+            sdas.append(get_sda(one_sda, sda_states, sda_chars))
+            one_sda = []
+        elif sda_start:
+            one_sda.append(str(line))
+            pass
+        pass
+    return sdas, outputs, fits
+
+
+def process_sda2(batch: list, sda_states: int, sda_chars: int):
+    sdas, outputs, fits = [], [], []
+    one_sda = []
+    for line in batch:
+        if line.__contains__(":"):
+            fits.append(int(line.rstrip().split(": ")[1]))
+            sda_start = True
             pass
         elif sda_start and not line.__contains__("-"):
             sda_start = False
@@ -416,11 +438,11 @@ def make_convergence_plot(folder: str, run_num: int, out_path):
     pass
 
 
-def make_heatmap(sda_infos: list, num_states, num_chars, out_path , num_gens, run_num):
+def make_heatmap(sda_infos: list, num_states, num_chars, out_path, num_gens, run_num):
     count = [[0 for _ in range(num_states)] for _ in range(num_states * num_chars)]
     for sda in sda_infos:
         transitions = sda[2]
-        for st,trans in enumerate(transitions):
+        for st, trans in enumerate(transitions):
             for ch, tr in enumerate(trans):
                 row = num_chars * st + ch
                 col = tr
@@ -435,18 +457,56 @@ def make_heatmap(sda_infos: list, num_states, num_chars, out_path , num_gens, ru
         pass
 
     f = plt.figure()
-    f.set_figheight(5)
-    f.set_figwidth(5)
+    f.set_figheight(7)
+    f.set_figwidth(7)
     plot = f.add_subplot(111)
-    plot.imshow(count, aspect='auto')
-    plot.set_yticks([x * num_chars + int(num_chars/2) - 0.5 for x in range(num_states)], (x + 1 for x in range(num_states)))
-    plot.set_xticks([y for y in range(num_states)], (y + 1 for y in range(num_states)))
-    for y in range(3, 4*num_states, 4):
-        plot.axhline(y=y+0.5, color="#000000", linestyle="-", linewidth="1")
+    hm = plot.imshow(count, aspect='auto')
+
+    ylbls = []
+    ylocs = []
+    for s in range(num_states):
+        for idx, c in enumerate(alphabet):
+            ylbls.append(c)
+            ylocs.append(s * num_chars + idx)
+            pass
         pass
-    f.subplots_adjust(bottom=0.11, top=0.93, left=0.05, right=0.99)
+
+    plot.tick_params(axis="y", direction="in", pad=15)
+    plot.set_yticks([y * num_chars + 1.5 for y in range(num_states)], (s + 1 for s in range(num_states)), minor=False,
+                    fontsize=12)
+    plot.set_yticks(ylocs, ylbls, minor=True, fontsize=6)
+    plot.set_xticks([y for y in range(num_states)], (y + 1 for y in range(num_states)), fontsize=12)
+    f.suptitle("Population's Transition Heatmap for Run " + str(run_num) + " after " + str(num_gens) + " Mating Events", fontsize=14)
+    plot.set_xlabel("To State", fontsize=12)
+    plot.set_ylabel("From State and The Character Driving Transition", fontsize=12)
+    cbar = plot.figure.colorbar(hm, ax=plot, pad=0.01)
+    for y in range(3, 4 * num_states, 4):
+        plot.axhline(y=y + 0.5, color="#000000", linestyle="-", linewidth="1")
+        pass
+    f.subplots_adjust(bottom=0.07, top=0.94, left=0.10, right=1.05)
     f.savefig(out_path + "trans_heatmap" + str(num_gens).zfill(8) + ".png", dpi=500)
-    return count
+    pass
+
+
+def process_genes(types: list, sda_outputs, sda_fits, out_path, run_num, num_gens):
+    out_path = out_path + "Run" + str(run_num).zfill(2) + "/"
+    if not os.path.exists(out_path):
+        os.makedirs(out_path)
+        pass
+
+    with open(out_path + "genes_" + str(num_gens).zfill(8) + ".dat", "w") as f:
+        for idx, type in enumerate(types):
+            f.write(type + "\n")
+            for sda, out in enumerate(sda_outputs[idx]):
+                for ch in out:
+                    f.write(alphabet[int(ch)])
+                    pass
+                f.write("\t" + str(sda_fits[idx][sda]))
+                f.write("\n")
+                pass
+            pass
+        pass
+    pass
 
 
 def main():
@@ -576,16 +636,60 @@ def main():
             num_gens = idx * reporting_interval
             sda_infos, sda_outputs, sda_fits = process_sda(batch, sda_states, sda_chars)
             if num_gens % print_every == 0:
-                for sda_idx, inf in enumerate(sda_infos):
-                    make_graph(edge_list(inf[2], sda_states), fold + "/Run" + str(best_run).zfill(2) + "/SDA_" +
-                               str(num_gens).zfill(8) + "_" + str(sda_idx + 1).zfill(2), sda_states)
-                    pass
+                # for sda_idx, inf in enumerate(sda_infos):
+                #     make_graph(edge_list(inf[2], sda_states), fold + "/Run" + str(best_run).zfill(2) + "/SDA_" +
+                #                str(num_gens).zfill(8) + "_" + str(sda_idx + 1).zfill(2), sda_states)
+                #     pass
                 make_heatmap(sda_infos, sda_states, sda_chars, out_path, num_gens, best_run)
                 pass
             pass
 
         make_convergence_plot(inp + fold + "/", best_run, out_path)
 
+        all_sda_gene_files = os.listdir(inp + fold + "/SDA Genes/")
+        best_sda_gene_files = []
+        for file in all_sda_gene_files:
+            if file.__contains__("genes" + str(best_run).zfill(2)):
+                best_sda_gene_files.append(file)
+                pass
+            pass
+
+        comparison_types = ["Best with Best", "Best with Worst", "Best with Random", "Worst with Random"]
+        all_parents = []
+        all_children = []
+        for idx, file in enumerate(best_sda_gene_files):
+            num_gens = reporting_interval * idx
+            parents = []
+            children = []
+            batches = []
+            with open(inp + fold + "/SDA Genes/" + file) as f:
+                lines = f.readlines()
+                batch = []
+                for line in lines:
+                    if line.__contains__("with"):
+                        if len(batch) > 0:
+                            batches.append(batch)
+                            pass
+                        batch = []
+                        pass
+                    else:
+                        batch.append(line)
+                        pass
+                    pass
+                batches.append(batch)
+                pass
+
+            multi_outputs = []
+            multi_fits = []
+
+            for idx, batch in enumerate(batches):
+                sda_infos, sda_outputs, sda_fits = process_sda2(batch, sda_states, sda_chars)
+                multi_outputs.append(sda_outputs)
+                multi_fits.append(sda_fits)
+                pass
+            process_genes(comparison_types, multi_outputs, multi_fits, out_path, best_run, num_gens)
+            pass
+        pass
 
     print("DONE")
     pass
