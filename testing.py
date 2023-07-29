@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from graphviz import Digraph
 from matplotlib.legend_handler import HandlerTuple
 from matplotlib.patches import Patch
+import numpy as np
 
 # inp = "../../Conferences and Papers/2023 CIBCB/AAMatcher/AAMOut/"
 inp = "./AAMTestOut/"
@@ -408,7 +409,7 @@ def make_convergence_plot(folder: str, run_num: int, out_path):
     f.set_figwidth(10)
     plot = f.add_subplot(111)
 
-    xs = [i for i in range(0, 100001, 10000)]
+    xs = [i for i in range(0, 1000001, 10000)]
 
     cross_x = []
     cross_y = []
@@ -511,7 +512,7 @@ def process_genes(types: list, sda_outputs, sda_fits, out_path, run_num, num_gen
 
 def main():
     folder_names = os.listdir(inp)
-    print_every = 50000
+    print_every = 250000
 
     for fold in folder_names:
         out_path = outp + fold
@@ -611,7 +612,7 @@ def main():
         #                      ["Sets of " + str(trans_muts) + ", " + str(resp_muts) + " Mutations", "Mutation"])
         #         pass
         #     pass
-        #
+
 
         best_sda_check_file = inp + fold + "/SDA Checks/pop" + str(best_run).zfill(2) + ".dat"
         sda_batches = []

@@ -219,15 +219,15 @@ int matingEvent(bool biggerBetter, int currentGen, ostream &outp) {
     }
     if (improvement) {
         if (fit1a > fit1b) {
-            pop[idxs.end()[-1]] = child1b;
-            fits[idxs.end()[-1]] = fit1b;
+            pop[idxs.end()[-1]] = child1a;
+            fits[idxs.end()[-1]] = fit1a;
         } else {
             pop[idxs.end()[-1]] = child1a;
             fits[idxs.end()[-1]] = fit1a;
         }
         if (fit2a > fit2b) {
-            pop[idxs.end()[-2]] = child2b;
-            fits[idxs.end()[-2]] = fit2b;
+            pop[idxs.end()[-2]] = child2a;
+            fits[idxs.end()[-2]] = fit2a;
         } else {
             pop[idxs.end()[-2]] = child2a;
             fits[idxs.end()[-2]] = fit2a;
