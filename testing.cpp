@@ -96,7 +96,7 @@ int main(int argc, char *argv[]) {
         int stallCount = 0;
         double best = (BIGGER_BETTER ? 0 : MAXFLOAT);
 
-        while (gen <= maxGens && stallCount < TERM_CRIT) {
+        while (gen <= maxGens && (stallCount < TERM_CRIT || gen < 0.5 * maxGens)) {
             matingEvent(BIGGER_BETTER, gen, runGains);
 
             if (gen % REPORT_EVERY == 0) {
@@ -112,7 +112,7 @@ int main(int argc, char *argv[]) {
                 if (dynamicMutOperator != 0) updateMutSpread(dynamicMutOperator);
             }
 
-            if (gen % TEST_EVERY == 0 && stallCount < TERM_CRIT) {
+            if (gen % TEST_EVERY == 0 && (stallCount < TERM_CRIT || gen < 0.5 * maxGens)) {
                 if (DO_MUT_CROSS_CHECKS) {
                     sprintf(filename, "%s/Crossover Checks/crossover%02d_%05dk.dat", pathToOut, run, gen / 1000);
                     crossFile.open(filename, ios::out);
@@ -134,7 +134,7 @@ int main(int argc, char *argv[]) {
                 if (DO_SDA_CHECKS) sdaCheck(sdaFile, gen);
             }
 
-            if (gen % (int) (CULLING_EVERY * REPORT_EVERY) == 0 && stallCount < TERM_CRIT) {
+            if (gen % (int) (CULLING_EVERY * REPORT_EVERY) == 0 && (stallCount < TERM_CRIT || gen < 0.5 * maxGens)) {
                 if (gen != maxGens) {
                     culling(cullingRate, randomCulling, BIGGER_BETTER);
                 }
