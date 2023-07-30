@@ -1,15 +1,12 @@
 import math
 import os
-import sys
-from math import cos, pi, sin
 from operator import itemgetter
 
 import matplotlib.pyplot as plt
-from graphviz import Graph
 import numpy as np
 
-inp = "./AAMOut/"
-outp = "./AAMFigs/"
+inp = "./AAMTestOut/"
+outp = "./AAMTestFigs/"
 finame = "exp.dat"
 samps = 50
 precision = 6
@@ -267,22 +264,24 @@ def DNA_to_int(seq: str):
 def main():
     print("START")
     folder_names = os.listdir(inp)
-    seq_idx = 1
-
-    states = ["12St", "24St"]
-    muts = ["2MNM", "4MNM", "7MNM", "10MNM"]
-    tsize = ["5TS", "9TS"]
-    crossover = ["1StCO", "2PtCO"]
-    cross_rate = ["050%CrR", "100$CrR"]
-    mut_rate = ["050%MR", "100%MR"]
-    cull_rate = ["025%CuR", "100%CuR"]
-    cull_mode = ["RandCu", "WorstCu"]
+    seq_idxs = [0, 1, 2, 3, 4, 5]
+    popsizes = ["0050PS", "0500PS"]
+    states = ["05St", "20St"]
+    trans_muts = ["2NTM", "4NTM"]
+    resp_muts = ["2NRM", "4NRM"]
+    tsize = ["7TS"]
+    crossover = ["2PtCO"]
+    cross_rate = ["050%CrR"]
+    mut_rate = ["100%MR"]
+    cull_rate = ["025%CuR"]
+    cull_every = ["1CE", "5CE"]
+    mut_update = [0,1,2,3,4]
 
     groups = []
-    for s in states:
-        for m in muts:
-            for t in tsize:
-                groups.append([s,m,t])
+    for seq in seq_idxs:
+        for st in states:
+            for ps in popsizes:
+                groups.append(["Seq" + str(seq), st, ps])
                 pass
             pass
         pass
@@ -294,7 +293,7 @@ def main():
         print(int_to_DNA(sequences[idx]))
         pass
 
-    freq_data = get_char_freqs(sequences, 4)
+    freq_data = get_char_freqs(sequences, num_chars=4)
     for dat in freq_data[1:]:
         print(freq_data[0])
         print(dat)
@@ -306,25 +305,26 @@ def main():
         one_exp = []
         for fld in folder_names:
             if all(fld.__contains__(itm) for itm in dat):
-                if not (fld.__contains__("RandCu") and fld.__contains__("100%CuR")):
-                    one_exp.append(fld)
-                    all_dirs.append(fld)
-                pass
+                one_exp.append(fld)
+                all_dirs.append(fld)
             pass
         exp_dirs.append(one_exp)
         pass
 
     exp_lbls = []
     exp_num = 1
-    for dir in exp_dirs[0]:
+    for dir in exp_dirs[4]:
         lbl = ""
         fields = dir.rstrip().split(",")
         lbl += str(exp_num).zfill(2) + "("
-        lbl += fields[5].lstrip().split("CO")[0] + ", "
-        lbl += str(int(fields[6].lstrip().split("%CrR")[0])).zfill(3) + ", "
-        lbl += str(int(fields[7].lstrip().split("%MR")[0])).zfill(3) + ", "
-        lbl += str(int(fields[8].lstrip().split("%CuR")[0])).zfill(3) + ", "
-        lbl += fields[9].lstrip().split("Cu")[0][0] + ")"
+        lbl += str(int(fields[3].lstrip().split("NTM")[0])).zfill(3) + ", "
+        lbl += str(int(fields[4].lstrip().split("NRM")[0])).zfill(3) + ", "
+        if dir.__contains__("Static"):
+            lbl += "Static, "
+        else:
+            lbl += fields[5].rstrip() + ", "
+            pass
+        lbl += str(int(fields[12].lstrip().split("CE")[0])) + ")"
         exp_lbls.append(lbl)
         exp_num += 1
         pass
@@ -354,54 +354,61 @@ def main():
             pass
         pass
 
-    title = "Sequence Matching with Sequence 1 and "
+    title = "Sequence Matching with Sequence "
     # xsp = [[i for i in range(len(all_data[0]))], [i for i in range(len(all_data[1]))]]
     # xpos = [xsp[0], xsp[1], xsp[0], xsp[1], xsp[0], xsp[1], xsp[0], xsp[1]]
     ylb = "Fitness"
-    xlb = "Experiment (Crossover Operator, Crossover Rate, Mutation Rate, Culling Rate, Culling Strategy)"
+    xlb = "Experiment (Initial Transition Mutations, Initial Response Mutations, Mutation Rate Updater, Culling Every)"
 
     lxpos = []
     for i in range(6, len(mode_stats[0]), 6):
         lxpos.append(i + 0.5)
         pass
-    colors = ['#FF88FF','#FF8888', '#FFFF88', '#0088FF','#008888', '#00FF88']
-    for gidx, seq in enumerate(groups):
-        f = open(outp + "exp_table" + str(gidx + 1) + ".dat", "w")
-        for idxx, gr in enumerate(exp_dirs[gidx]):
-            f.write(str(idxx + 1) + "\t")
-            f.write(gr)
-            f.write("\n")
+    colors = ['#FF88FF', '#FF8888', '#FFFF88', '#0088FF', '#008888', '#00FF88']
+    for gidx, ginfo in enumerate(groups):
+        if len(mode_stats[gidx]) > 0:
+            seq_id = int(ginfo[0][3:])
+            num_states = str(int(ginfo[1][:2]))
+            popsize = str(int(ginfo[2][:4]))
+            f = open(outp + "exp_table" + str(gidx + 1) + ".dat", "w")
+            for idxx, gr in enumerate(exp_dirs[gidx]):
+                f.write(str(idxx + 1) + "\t")
+                f.write(gr)
+                f.write("\n")
+                pass
+            f.close()
+
+            plt.style.use("seaborn-v0_8")
+            plt.rc('xtick', labelsize=8)
+            plt.rc('ytick', labelsize=8)
+
+            f = plt.figure()
+            f.set_figheight(4.5)
+            f.set_figwidth(8)
+            plot = f.add_subplot(111)
+
+            bp = plot.boxplot(mode_stats[gidx], patch_artist=True)
+            box_plot(bp, 1, [[[i for i in range(len(mode_stats[gidx]))], colors]])
+
+            plot.set_xticks([1,2])
+            plot.set_xticklabels(exp_lbls, rotation=90)
+
+            new_title = title + str(seq_id) + " with " + num_states + " States and " + popsize + " Population Size"
+            f.suptitle(new_title, fontsize=14)
+            plot.set_xlabel(xlb, fontsize=10)
+            plot.set_ylabel(ylb, fontsize=10)
+
+            # plot.hlines(y=0.2, xmin=0.5, xmax=20, linewidth=2, color='r')
+            plot.hlines(y=len(sequences[seq_id]), xmin=0.5, xmax=len(mode_stats[gidx]) + 0.5, color="#0000FF",
+                        linestyles="dashed", linewidth=1)
+            for x in lxpos:
+                plot.axvline(x=x, color='black', linestyle='--', linewidth=0.75)
+                pass
+            plot.grid(visible="True", axis="y", which='major', color="darkgray", linewidth=0.75)
+            f.tight_layout()
+            f.savefig(outp + "AAMatchSeq" + str(seq_id) + ginfo[1] + ginfo[2] + "_boxplot.png", dpi=300)
+            plt.close()
             pass
-        f.close()
-
-        plt.style.use("seaborn-v0_8")
-        plt.rc('xtick', labelsize=8)
-        plt.rc('ytick', labelsize=8)
-
-        f = plt.figure()
-        f.set_figheight(4.5)
-        f.set_figwidth(8)
-        plot = f.add_subplot(111)
-
-        bp = plot.boxplot(mode_stats[gidx], patch_artist=True)
-        box_plot(bp, 1, [[[i for i in range(len(mode_stats[gidx]))], colors]])
-
-        # plot.set_xticks(xpos[idx])
-        plot.set_xticklabels(exp_lbls, rotation=90)
-
-        new_title = title + groups[gidx][0] + " " + groups[gidx][1] + " " + groups[gidx][2]
-        f.suptitle(new_title, fontsize=14)
-        plot.set_xlabel(xlb, fontsize=10)
-        plot.set_ylabel(ylb, fontsize=10)
-
-        plot.hlines([len(sequences[seq_idx])], 0.5, len(mode_stats[seq_idx]) + 0.5, colors="#0000FF", linestyles="dashed", linewidth=1)
-        for x in lxpos:
-            plot.axvline(x=x, color='black', linestyle='--', linewidth=0.75)
-            pass
-        plot.grid(visible="True", axis="y", which='major', color="darkgray", linewidth=0.75)
-        f.tight_layout()
-        f.savefig(outp + "AAMatchSeq" + str(gidx + 1) + "_boxplot.png", dpi=300)
-        plt.close()
         pass
 
     # for sidx, seq in enumerate(seq_idxs):

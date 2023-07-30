@@ -7,6 +7,8 @@
  * utilizing dynamic methods to increase and decrease the number of mutation being perfomred during a set of mating events
 */
 
+#define TEST_EVERY 500000
+
 int updateMutSpread(int dmo) {
     if (dmo == 1) { // increase number of transition mutations & decrease number of response mutations
         if (numTransMuts <= 50) numTransMuts++;
@@ -144,9 +146,7 @@ int matingEvent(bool biggerBetter, int currentGen, ostream &outp) {
     vector<int> idxs = tournSelect(tournSize, biggerBetter);
 
     child1a.copy(pop[idxs[0]]);
-    fit1a = fits[idxs[0]];
     child2a.copy(pop[idxs[1]]);
-    fit2a = fits[idxs[1]];
     if (drand48() < crossoverRate) {
         if (crossoverOp == 0) child1a.twoPointCrossover(child2a);
         else if (crossoverOp == 1) child1a.oneStateCrossover(child2a);
@@ -178,12 +178,13 @@ int matingEvent(bool biggerBetter, int currentGen, ostream &outp) {
                 populationBestFit = min(fit1a, fit2a);
             }
         }
+    } else {
+        fit1a = fits[idxs[0]];
+        fit2a = fits[idxs[1]];
     }
 
     child1b.copy(child1a);
-    fit1b = fit1a;
     child2b.copy(child2a);
-    fit2b = fit2a;
 
     if (drand48() < mutationRate) {
         child1b.mutate(numTransMuts, numRespMuts);
@@ -216,16 +217,19 @@ int matingEvent(bool biggerBetter, int currentGen, ostream &outp) {
                 populationBestFit = min(fit1b, fit2b);
             }
         }
+    } else {
+        fit1b = fit1a;
+        fit2b = fit2a;
     }
     if (improvement) {
-        if (fit1a > fit1b) {
+        if (fit1a >= fit1b) {
             pop[idxs.end()[-1]] = child1a;
             fits[idxs.end()[-1]] = fit1a;
         } else {
             pop[idxs.end()[-1]] = child1b;
             fits[idxs.end()[-1]] = fit1b;
         }
-        if (fit2a > fit2b) {
+        if (fit2a >= fit2b) {
             pop[idxs.end()[-2]] = child2a;
             fits[idxs.end()[-2]] = fit2a;
         } else {

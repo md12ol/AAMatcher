@@ -1,9 +1,9 @@
 from random import randint
 
-exec_path = "./cmake-build-release---remote/SDATester"
+exec_path = "./cmake-build-release---graham/SDATester"
 popsizes = [50, 500]
 num_chars = 4
-num_states = [20]
+num_states = [5]
 num_runs = 50
 gens = 10000000
 num_muts = [2, 4]
@@ -19,7 +19,7 @@ culling_every = [1, 5]
 
 
 def main():
-    with open("./table.dat", "w") as f:
+    with open("./table2Graham.dat", "w") as f:
         for sn in seq_nums:
             for ps in popsizes:
                 for ns in num_states:

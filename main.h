@@ -422,7 +422,6 @@ int runReport(ostream &outp, bool biggerBetter) {
         reverse(fitsCopy.begin(), fitsCopy.end());
     }
     printVector<multiStream, double>(printAndSave, fitsCopy, "Fitness Values: ", " ", true);
-    cout << endl;
     return bestIdx;
 }
 

@@ -3,10 +3,11 @@ import os
 
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
+import numpy as np
 from graphviz import Digraph
 from matplotlib.legend_handler import HandlerTuple
 from matplotlib.patches import Patch
-import numpy as np
+from matplotlib import colors
 
 # inp = "../../Conferences and Papers/2023 CIBCB/AAMatcher/AAMOut/"
 inp = "./AAMTestOut/"
@@ -365,7 +366,7 @@ def make_graph(el: [], out_file: str, verts: int):
     pass
 
 
-def make_convergence_plot(folder: str, run_num: int, out_path):
+def make_convergence_plot(folder: str, run_num: int, out_path, num_gens):
     means = []
     bests = []
     with open(folder + "run" + str(run_num).zfill(2) + ".dat") as f:
@@ -409,7 +410,7 @@ def make_convergence_plot(folder: str, run_num: int, out_path):
     f.set_figwidth(10)
     plot = f.add_subplot(111)
 
-    xs = [i for i in range(0, 1000001, 10000)]
+    xs = [i for i in range(0, num_gens + 1, 10000)]
 
     cross_x = []
     cross_y = []
@@ -457,11 +458,17 @@ def make_heatmap(sda_infos: list, num_states, num_chars, out_path, num_gens, run
         os.makedirs(out_path)
         pass
 
+    plt.style.use("seaborn-v0_8")
+    cmap = colors.ListedColormap(['green', 'red', 'black', 'yellow'])
+    bounds = [-0.5, 0.5, 1.5, 2.5, 3.5]
+    norm = colors.BoundaryNorm(bounds, cmap.N)
+
     f = plt.figure()
     f.set_figheight(7)
     f.set_figwidth(7)
     plot = f.add_subplot(111)
-    hm = plot.imshow(count, aspect='auto')
+    hm = plot.imshow(count, aspect='auto',  cmap='viridis')
+    # hm = plt.pcolor(count, aspect='auto', cmap=cmap, norm=norm)
 
     ylbls = []
     ylocs = []
@@ -477,10 +484,12 @@ def make_heatmap(sda_infos: list, num_states, num_chars, out_path, num_gens, run
                     fontsize=12)
     plot.set_yticks(ylocs, ylbls, minor=True, fontsize=6)
     plot.set_xticks([y for y in range(num_states)], (y + 1 for y in range(num_states)), fontsize=12)
-    f.suptitle("Population's Transition Heatmap for Run " + str(run_num) + " after " + str(num_gens) + " Mating Events", fontsize=14)
+    f.suptitle("Population's Transition Heatmap for Run " + str(run_num) + " after " + str(num_gens) + " Mating Events",
+               fontsize=14)
     plot.set_xlabel("To State", fontsize=12)
     plot.set_ylabel("From State and The Character Driving Transition", fontsize=12)
     cbar = plot.figure.colorbar(hm, ax=plot, pad=0.01)
+    plot.grid(None)
     for y in range(3, 4 * num_states, 4):
         plot.axhline(y=y + 0.5, color="#000000", linestyle="-", linewidth="1")
         pass
@@ -512,7 +521,7 @@ def process_genes(types: list, sda_outputs, sda_fits, out_path, run_num, num_gen
 
 def main():
     folder_names = os.listdir(inp)
-    print_every = 250000
+    print_every = 500000
 
     for fold in folder_names:
         out_path = outp + fold
@@ -527,173 +536,177 @@ def main():
                                                                              sda_states, sda_chars)
         process_exp(inp + fold + "/exp.dat", sda_states, sda_chars)
 
-        # all_crossover_files = os.listdir(inp + fold + "/Crossover Checks/")
-        # best_run_crossover_files = []
-        # for file in all_crossover_files:
-        #     if file.__contains__("crossover" + str(best_run).zfill(2)):
-        #         best_run_crossover_files.append(file)
-        #         pass
-        #     pass
-        #
-        # datasets = []
-        # for file in best_run_crossover_files:
-        #     child_fits_for_parents, parent_fits = get_data(inp + fold + "/Crossover Checks/" + file, popsize, True)
-        #     # child_fits[mom][dad] = list of all children generated from 100 crossovers
-        #     # parent_fits[parent_idx] = fitness value assigned to parent with index parent_idx
-        #     datasets.append([child_fits_for_parents, parent_fits])
-        #     pass
-        #
-        # # ds = [child_fits[], parent_fits[]] at one point of evolution
-        # for idx, ds in enumerate(datasets):  # for each report
-        #     num_gens = int(best_run_crossover_files[idx].rstrip().split("_")[1].split("k")[0]) * 1000
-        #     all_children_fits_for_parent = []
-        #     # all_parent_means[idx] = the values representing parents mean fitness - children's mean fitness
-        #     all_couple_means = [[] for _ in range(popsize)]
-        #
-        #     for mom in range(popsize):
-        #         one_parent_means = []
-        #         for dad in range(popsize):
-        #             if mom == dad:
-        #                 one_parent_means.append(0)
-        #             else:
-        #                 parent_mean = (ds[1][mom] + ds[1][dad]) / 2
-        #                 child_mean = np.mean(ds[0][mom][dad])
-        #                 one_parent_means.append(child_mean - parent_mean)
-        #                 pass
-        #             pass
-        #         all_couple_means[mom] = one_parent_means
-        #         pass
-        #
-        #     for parent_idx, child_fits_for_parents in enumerate(ds[0]):
-        #         if num_gens % print_every == 0:
-        #             make_boxplot(child_fits_for_parents, ds[1], all_couple_means[parent_idx], parent_idx, out_path,
-        #                          best_run, num_gens, popsize, [crossOp, "Crossover"])
-        #             pass
-        #         holder = []
-        #         for vals in child_fits_for_parents:
-        #             holder.extend(vals)
-        #             pass
-        #         all_children_fits_for_parent.append(holder)
-        #         pass
-        #
-        #     if num_gens % print_every == 0:
-        #         mean_diff = [np.mean(all_children_fits_for_parent[i]) - ds[1][i] for i in range(popsize)]
-        #         make_boxplot(all_children_fits_for_parent, ds[1], mean_diff, -1, out_path, best_run, num_gens, popsize,
-        #                      [crossOp, "Crossover"])
-        #         pass
-        #     pass
-        #
-        # all_mutation_files = os.listdir(inp + fold + "/Mutate Checks/")
-        # best_run_mutation_files = []
-        # for file in all_mutation_files:
-        #     if file.__contains__("mutate" + str(best_run).zfill(2)):
-        #         best_run_mutation_files.append(file)
-        #         pass
-        #     pass
-        #
-        # datasets = []
-        # for file in best_run_mutation_files:
-        #     child_fits_for_parents, parent_fits = get_data(inp + fold + "/Mutate Checks/" + file, popsize, False)
-        #     datasets.append([child_fits_for_parents, parent_fits])
-        #     pass
-        #
-        # for idx, ds in enumerate(datasets):
-        #     num_gens = int(best_run_mutation_files[idx].rstrip().split("_")[1].split("k")[0]) * 1000
-        #
-        #     parent_child_diff = []
-        #     for mom in range(popsize):
-        #         parent_fit = ds[1][mom]
-        #         child_mean = np.mean(ds[0][mom])
-        #         parent_child_diff.append(child_mean - parent_fit)
-        #         pass
-        #
-        #     if num_gens % print_every == 0:
-        #         make_boxplot(ds[0], ds[1], parent_child_diff, -2, out_path, best_run, num_gens, popsize,
-        #                      ["Sets of " + str(trans_muts) + ", " + str(resp_muts) + " Mutations", "Mutation"])
-        #         pass
-        #     pass
+        # Crossover Checks
+        if os.path.exists(inp + fold + "/Crossover Checks/"):
+            all_crossover_files = os.listdir(inp + fold + "/Crossover Checks/")
+            best_run_crossover_files = []
+            for file in all_crossover_files:
+                if file.__contains__("crossover" + str(best_run).zfill(2)):
+                    best_run_crossover_files.append(file)
+                    pass
+                pass
 
+            datasets = []
+            for file in best_run_crossover_files:
+                child_fits_for_parents, parent_fits = get_data(inp + fold + "/Crossover Checks/" + file, popsize, True)
+                # child_fits_for_parents[mom][dad] = list of all children fits generated from 100 crossovers
+                # parent_fits[parent_idx] = fitness value assigned to parent with index parent_idx
+                num_gens = int(file.rstrip().split("_")[1].split("k")[0]) * 1000
+                datasets.append([child_fits_for_parents, parent_fits, num_gens])
+                pass
+
+            # ds = [child_fits[], parent_fits[]] at one point of evolution
+            for idx, ds in enumerate(datasets):  # for each report
+                all_children_fits_for_parent = []
+                # all_parent_means[idx] = the values representing parents mean fitness - children's mean fitness
+                all_couple_means = [[] for _ in range(popsize)]
+
+                for mom in range(popsize):
+                    one_parent_means = []
+                    for dad in range(popsize):
+                        if mom == dad:
+                            one_parent_means.append(0)
+                        else:
+                            parent_mean = (ds[1][mom] + ds[1][dad]) / 2
+                            child_mean = np.mean(ds[0][mom][dad])
+                            one_parent_means.append(child_mean - parent_mean)
+                            pass
+                        pass
+                    all_couple_means[mom] = one_parent_means
+                    pass
+
+                for parent_idx, child_fits_for_parents in enumerate(ds[0]):
+                    # make_boxplot(child_fits_for_parents, ds[1], all_couple_means[parent_idx], parent_idx, out_path,
+                    #                  best_run, ds[2], popsize, [crossOp, "Crossover"])
+                    holder = []
+                    for vals in child_fits_for_parents:
+                        holder.extend(vals)
+                        pass
+                    all_children_fits_for_parent.append(holder)
+                    pass
+
+                mean_diff = [np.mean(all_children_fits_for_parent[i]) - ds[1][i] for i in range(popsize)]
+                make_boxplot(all_children_fits_for_parent, ds[1], mean_diff, -1, out_path, best_run, ds[2], popsize,
+                             [crossOp, "Crossover"])
+                pass
+            pass
+
+        # Mutation Checks
+        if os.path.exists(inp + fold + "/Mutate Checks/"):
+            all_mutation_files = os.listdir(inp + fold + "/Mutate Checks/")
+            best_run_mutation_files = []
+            for file in all_mutation_files:
+                if file.__contains__("mutate" + str(best_run).zfill(2)):
+                    best_run_mutation_files.append(file)
+                    pass
+                pass
+
+            datasets = []
+            for file in best_run_mutation_files:
+                child_fits_for_parents, parent_fits = get_data(inp + fold + "/Mutate Checks/" + file, popsize, False)
+                datasets.append([child_fits_for_parents, parent_fits])
+                pass
+
+            for idx, ds in enumerate(datasets):
+                num_gens = int(best_run_mutation_files[idx].rstrip().split("_")[1].split("k")[0]) * 1000
+
+                parent_child_diff = []
+                for mom in range(popsize):
+                    parent_fit = ds[1][mom]
+                    child_mean = np.mean(ds[0][mom])
+                    parent_child_diff.append(child_mean - parent_fit)
+                    pass
+
+                make_boxplot(ds[0], ds[1], parent_child_diff, -2, out_path, best_run, num_gens, popsize,
+                             ["Sets of " + str(trans_muts) + ", " + str(resp_muts) + " Mutations", "Mutation"])
+                pass
+            pass
 
         best_sda_check_file = inp + fold + "/SDA Checks/pop" + str(best_run).zfill(2) + ".dat"
         sda_batches = []
+        num_gens = 0
         with open(best_sda_check_file) as f:
             lines = f.readlines()
             batch = []
             for line in lines:
                 if line.__contains__("Population After"):
                     if len(batch) > 0:
-                        sda_batches.append(batch)
+                        sda_batches.append([batch, num_gens])
                         batch = []
                         pass
+                    num_gens = int(line.split("Population After ")[1].split(" Mating Events")[0])
                     pass
                 else:
                     batch.append(line)
                     pass
                 pass
+            sda_batches.append([batch, num_gens])
             pass
 
+        # SDA Checks -> Heatmaps of Transitions
         # sda_infos[sda] = init_state, init_char, sda_trans, sda_resps
         for idx, batch in enumerate(sda_batches):
-            num_gens = idx * reporting_interval
-            sda_infos, sda_outputs, sda_fits = process_sda(batch, sda_states, sda_chars)
-            if num_gens % print_every == 0:
-                # for sda_idx, inf in enumerate(sda_infos):
-                #     make_graph(edge_list(inf[2], sda_states), fold + "/Run" + str(best_run).zfill(2) + "/SDA_" +
-                #                str(num_gens).zfill(8) + "_" + str(sda_idx + 1).zfill(2), sda_states)
-                #     pass
-                make_heatmap(sda_infos, sda_states, sda_chars, out_path, num_gens, best_run)
-                pass
-            pass
+            num_gens = batch[1]
+            sda_infos, sda_outputs, sda_fits = process_sda(batch[0], sda_states, sda_chars)
+            # for sda_idx, inf in enumerate(sda_infos):
+            #     make_graph(edge_list(inf[2], sda_states), fold + "/Run" + str(best_run).zfill(2) + "/SDA_" +
+            #                str(num_gens).zfill(8) + "_" + str(sda_idx + 1).zfill(2), sda_states)
+            #     pass
+            make_heatmap(sda_infos, sda_states, sda_chars, out_path, num_gens, best_run)
+        pass
 
-        make_convergence_plot(inp + fold + "/", best_run, out_path)
+        # Convergence for Best Run
+        make_convergence_plot(inp + fold + "/", best_run, out_path, sda_batches[-1][1])
 
-        all_sda_gene_files = os.listdir(inp + fold + "/SDA Genes/")
-        best_sda_gene_files = []
-        for file in all_sda_gene_files:
-            if file.__contains__("genes" + str(best_run).zfill(2)):
-                best_sda_gene_files.append(file)
-                pass
-            pass
-
-        comparison_types = ["Best with Best", "Best with Worst", "Best with Random", "Worst with Random"]
-        all_parents = []
-        all_children = []
-        for idx, file in enumerate(best_sda_gene_files):
-            num_gens = reporting_interval * idx
-            parents = []
-            children = []
-            batches = []
-            with open(inp + fold + "/SDA Genes/" + file) as f:
-                lines = f.readlines()
-                batch = []
-                for line in lines:
-                    if line.__contains__("with"):
-                        if len(batch) > 0:
-                            batches.append(batch)
-                            pass
-                        batch = []
-                        pass
-                    else:
-                        batch.append(line)
-                        pass
+        # SDA Genes Check
+        if os.path.exists(inp + fold + "/SDA Genes/"):
+            all_sda_gene_files = os.listdir(inp + fold + "/SDA Genes/")
+            best_sda_gene_files = []
+            for file in all_sda_gene_files:
+                if file.__contains__("genes" + str(best_run).zfill(2)):
+                    best_sda_gene_files.append(file)
                     pass
-                batches.append(batch)
                 pass
 
-            multi_outputs = []
-            multi_fits = []
+            comparison_types = ["Best with Best", "Best with Worst", "Best with Random", "Worst with Random"]
+            all_parents = []
+            all_children = []
+            for idx, file in enumerate(best_sda_gene_files):
+                num_gens = int(file.rstrip().split("_")[1].split("k")[0]) * 1000
+                parents = []
+                children = []
+                batches = []
+                with open(inp + fold + "/SDA Genes/" + file) as f:
+                    lines = f.readlines()
+                    batch = []
+                    for line in lines:
+                        if line.__contains__("with"):
+                            if len(batch) > 0:
+                                batches.append(batch)
+                                pass
+                            batch = []
+                            pass
+                        else:
+                            batch.append(line)
+                            pass
+                        pass
+                    batches.append(batch)
+                    pass
 
-            for idx, batch in enumerate(batches):
-                sda_infos, sda_outputs, sda_fits = process_sda2(batch, sda_states, sda_chars)
-                multi_outputs.append(sda_outputs)
-                multi_fits.append(sda_fits)
+                multi_outputs = []
+                multi_fits = []
+
+                for idx, batch in enumerate(batches):
+                    sda_infos, sda_outputs, sda_fits = process_sda2(batch, sda_states, sda_chars)
+                    multi_outputs.append(sda_outputs)
+                    multi_fits.append(sda_fits)
+                    pass
+                process_genes(comparison_types, multi_outputs, multi_fits, out_path, best_run, num_gens)
                 pass
-            process_genes(comparison_types, multi_outputs, multi_fits, out_path, best_run, num_gens)
             pass
         pass
 
     print("DONE")
     pass
-
 
 main()
