@@ -1,9 +1,9 @@
 from random import randint
 
-exec_path = "./src/cmake-build-release---beluga/SDATester"
+exec_path = "./cmake-build-release---narval/SDATester"
 popsizes = [50, 500]
 num_chars = 4
-num_states = [20]
+num_states = [5, 20]
 num_runs = 50
 gens = 10000000
 num_muts = [2, 4]
@@ -14,14 +14,12 @@ crossRate = [0.5]
 mutateRate = [1]
 cullingRate = [0.25]
 randomCulling = [1]
-# dynamic_muts = [0, 1, 2, 3, 4]
-dynamic_muts = [3]
-dynamic_muts = [3]
+dynamic_muts = [0, 1, 2, 3, 4]
 culling_every = [1, 5]
 
 # %thing
 def main():
-    with open("./CC/tableFix.dat", "w") as f:
+    with open("./tableNarval1.dat", "w") as f:
         for sn in seq_nums:
             for ps in popsizes:
                 for ns in num_states:
