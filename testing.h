@@ -17,8 +17,8 @@ int updateMutSpread(int dmo) {
         if (curNumRespMuts < 50) curNumRespMuts++;
         if (curNumTransMuts > 0) curNumTransMuts--;
     } else {// alter the variables based on fitness improvment
-        double change = populationBestFit -
-                        prevBestFitness; // calculate amount of change between previous and current best fitness
+        // calculate amount of change between previous and current best fitness
+        double change = populationBestFit - prevBestFitness;
         change = change / prevBestFitness;// calculate percentage increase from previous best fitness
 
         if (dmo == 3) {
