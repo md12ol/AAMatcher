@@ -11,11 +11,11 @@
 
 int updateMutSpread(int dmo) {
     if (dmo == 1) { // increase number of transition mutations & decrease number of response mutations
-        if (numTransMuts <= 50) numTransMuts++;
-        if (numRespMuts >= 0) numRespMuts--;
+        if (curNumTransMuts <= 50) curNumTransMuts++;
+        if (curNumRespMuts >= 0) curNumRespMuts--;
     } else if (dmo == 2) { // increase number of response mutations & decrease number of trasnsition mutations
-        if (numRespMuts <= 50) numRespMuts++;
-        if (numTransMuts >= 0) numTransMuts--;
+        if (curNumRespMuts <= 50) curNumRespMuts++;
+        if (curNumTransMuts >= 0) curNumTransMuts--;
     } else {// alter the variables based on fitness improvment
         double change = populationBestFit -
                         prevBestFitness; // calculate amount of change between previous and current best fitness
@@ -23,12 +23,12 @@ int updateMutSpread(int dmo) {
 
         if (dmo == 3) {
             if (change == 0) { // if change equlas zero increase explorative ability of the GA
-                numRespMuts += 2;
-                numTransMuts += 2;
-            } else if (numRespMuts - 2 > 0 && numTransMuts - 2 >
-                                              0) { // if there was a change, decrease the amount of exploration and increase the amount of exploitation
-                numRespMuts -= 2;
-                numTransMuts -= 2;
+                if (curNumRespMuts < 100) curNumRespMuts += 2;
+                if (curNumTransMuts < 100) curNumTransMuts += 2;
+                // if there was a change, decrease the amount of exploration and increase the amount of exploitation
+            } else if (curNumRespMuts - 2 > 0 && curNumTransMuts - 2 > 0) {
+                curNumRespMuts -= 2;
+                curNumTransMuts -= 2;
             }
         } else {
             if (prevBestFitness != populationBestFit)
@@ -36,13 +36,13 @@ int updateMutSpread(int dmo) {
             else RICounter++;// else increase reporting interval counter
             if (RICounter !=
                 0) {// add the report interval counter to number of mutations performed to increase exploration
-                if (numRespMuts + RICounter < 50)numRespMuts += RICounter;
-                else numRespMuts = 50;// place a cap on the number of mutations that can be performed
-                if (numTransMuts + RICounter < 50)numTransMuts += RICounter;
-                else numTransMuts = 50;// place cap on the number of mutations that can be performed
+                if (curNumRespMuts + RICounter < 50)curNumRespMuts += RICounter;
+                else curNumRespMuts = 50;// place a cap on the number of mutations that can be performed
+                if (curNumTransMuts + RICounter < 50)curNumTransMuts += RICounter;
+                else curNumTransMuts = 50;// place cap on the number of mutations that can be performed
             } else {// reset the number of mutations to allow for exploration of the improvement
-                numRespMuts = 2;
-                numTransMuts = 2;
+                curNumRespMuts = 2;
+                curNumTransMuts = 2;
             }
         }
         prevBestFitness = populationBestFit; // update the previous best population fitness value
@@ -50,11 +50,11 @@ int updateMutSpread(int dmo) {
     return 0;
 } // updateMutSpread
 
-int crossover_all(ostream &outStrm, SDA &parent1, SDA &parent2){
+int crossover_all(ostream &outStrm, SDA &parent1, SDA &parent2) {
     SDA child1, child2;
     int count = 1;
-    for (int cp1 = 0; cp1 <= sdaStates; cp1++){
-        for (int cp2 = cp1 + 1; cp2 <= sdaStates; cp2++){
+    for (int cp1 = 0; cp1 <= sdaStates; cp1++) {
+        for (int cp2 = cp1 + 1; cp2 <= sdaStates; cp2++) {
             child1.copy(parent1);
             child2.copy(parent2);
             child1.twoPointCrossover(child2, cp1, cp2);
@@ -77,23 +77,23 @@ int genetic_diversity_check(ostream &outStrm) {
     secondBestFit = (BIGGER_BETTER ? 0 : INT32_MAX);
     worstFit = (BIGGER_BETTER ? INT32_MAX : 0);
     for (int idx = 0; idx < popsize; ++idx) {
-        if ((BIGGER_BETTER && fits[idx] > bestFit) ||(!BIGGER_BETTER && fits[idx] < bestFit)){
+        if ((BIGGER_BETTER && fits[idx] > bestFit) || (!BIGGER_BETTER && fits[idx] < bestFit)) {
             secondBestFit = bestFit;
             secondBestIdx = bestIdx;
-            bestFit = (int)fits[idx];
+            bestFit = (int) fits[idx];
             bestIdx = idx;
-        } else if ((BIGGER_BETTER && fits[idx] > secondBestFit) ||(!BIGGER_BETTER && fits[idx] < secondBestFit)){
-            secondBestFit = (int)fits[idx];
+        } else if ((BIGGER_BETTER && fits[idx] > secondBestFit) || (!BIGGER_BETTER && fits[idx] < secondBestFit)) {
+            secondBestFit = (int) fits[idx];
             secondBestIdx = idx;
         }
 
-        if ((BIGGER_BETTER && fits[idx] < worstFit) || (!BIGGER_BETTER && fits[idx] > worstFit)){
-            worstFit = (int)fits[idx];
+        if ((BIGGER_BETTER && fits[idx] < worstFit) || (!BIGGER_BETTER && fits[idx] > worstFit)) {
+            worstFit = (int) fits[idx];
             worstIdx = idx;
         }
     }
 
-    outStrm << "First SDA: " << bestFit<<endl;
+    outStrm << "First SDA: " << bestFit << endl;
     pop[bestIdx].printSDA(outStrm);
     pop[bestIdx].rtnOutput(true, outStrm);
     outStrm << "Second SDA: " << secondBestFit << endl;
@@ -105,7 +105,7 @@ int genetic_diversity_check(ostream &outStrm) {
     crossover_all(outStrm, parent1, parent2);
 
     outStrm << "Best with Worst" << endl;
-    outStrm << "First SDA: " << bestFit<<endl;
+    outStrm << "First SDA: " << bestFit << endl;
     pop[bestIdx].printSDA(outStrm);
     pop[bestIdx].rtnOutput(true, outStrm);
     outStrm << "Second SDA: " << worstFit << endl;
@@ -117,7 +117,7 @@ int genetic_diversity_check(ostream &outStrm) {
 
     outStrm << "Best with Random" << endl;
     parent2.randomize();
-    outStrm << "First SDA: " << bestFit<<endl;
+    outStrm << "First SDA: " << bestFit << endl;
     pop[bestIdx].printSDA(outStrm);
     pop[bestIdx].rtnOutput(true, outStrm);
     outStrm << "Second SDA: " << fitness(parent2) << endl;
@@ -128,7 +128,7 @@ int genetic_diversity_check(ostream &outStrm) {
     outStrm << "Worst with Random" << endl;
     parent1.copy(pop[worstIdx]);
     parent2.randomize();
-    outStrm << "First SDA: " << worstFit<<endl;
+    outStrm << "First SDA: " << worstFit << endl;
     parent1.printSDA(outStrm);
     parent1.rtnOutput(true, outStrm);
     outStrm << "Second SDA: " << fitness(parent2) << endl;
@@ -187,8 +187,8 @@ int matingEvent(bool biggerBetter, int currentGen, ostream &outp) {
     child2b.copy(child2a);
 
     if (drand48() < mutationRate) {
-        child1b.mutate(numTransMuts, numRespMuts);
-        child2b.mutate(numTransMuts, numRespMuts);
+        child1b.mutate(curNumTransMuts, curNumRespMuts);
+        child2b.mutate(curNumTransMuts, curNumRespMuts);
 
         fit1b = fitness(child1b);
         fit2b = fitness(child2b);
@@ -270,7 +270,7 @@ vector<int> runMultiMutate(int numEvents, SDA parent) {
     fitVals.reserve(numEvents);
     for (int i = 0; i < numEvents; ++i) {
         child.copy(parent);
-        child.mutate(numTransMuts, numRespMuts);
+        child.mutate(curNumTransMuts, curNumRespMuts);
         fitVals.push_back((int) fitness(child));
     }
     return fitVals;

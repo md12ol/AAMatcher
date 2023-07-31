@@ -1,6 +1,6 @@
 from random import randint
 
-exec_path = "./cmake-build-release---narval/SDATester"
+exec_path = "./src/cmake-build-release---beluga/SDATester"
 popsizes = [50, 500]
 num_chars = 4
 num_states = [20]
@@ -21,7 +21,7 @@ culling_every = [1, 5]
 
 # %thing
 def main():
-    with open("../CC/tableFix.dat", "w") as f:
+    with open("./CC/tableFix.dat", "w") as f:
         for sn in seq_nums:
             for ps in popsizes:
                 for ns in num_states:
@@ -42,7 +42,7 @@ def main():
                                                                 line = exec_path + " " + str(ps).zfill(3) + " " + str(
                                                                     num_chars) + " " + str(ns) + " " + str(rnd) + " " + str(
                                                                     num_runs) + " " + str(gens) + " " + str(mm) + " " + str(
-                                                                    dm) + " " + str(dm2) + " " + " " + str(sn) + " " + str(
+                                                                    dm) + " " + str(dm2) + " " + str(sn) + " " + str(
                                                                     ts) + " " + str(cop) + " " + "%0.2f" % cra + " " + \
                                                                        "%0.2f" % mr + " " + "%0.2f" % cur + " " + str(
                                                                     rc) + " " + str(ce)

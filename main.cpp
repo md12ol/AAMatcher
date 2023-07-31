@@ -43,7 +43,7 @@ int main(int argc, char *argv[]) {
     sprintf(dynamicMessage, "%s%d", (dynamicMutOperator == 0 ? "Static" : "Dynamic"), dynamicMutOperator);
     sprintf(pathToOut, "./AAMOut/AAMatch on Seq%d with %.1fmilMMEs, %04dPS, %02dSt, %02dNTM, %02dNRM, %s,"
                        " %dTS, %sCO, %03d%%CrR, %03d%%MR, %03d%%CuR, %sCu/", seqNum, (double) maxGens / 1000000,
-            popsize, sdaStates, numTransMuts, numRespMuts, dynamicMessage, tournSize,
+            popsize, sdaStates, initNumTransMuts, initNumRespMuts, dynamicMessage, tournSize,
             (crossoverOp == 0 ? "2Pt" : "1St"), (int) (crossoverRate * 100), (int) (mutationRate * 100),
             (int) (cullingRate * 100), (randomCulling ? "Rand" : "Worst"));
     mkdir(pathToOut, 0777);
@@ -54,6 +54,8 @@ int main(int argc, char *argv[]) {
 
     int tmp;
     for (int run = 1; run < runs + 1; ++run) {
+        curNumTransMuts = initNumTransMuts;
+        curNumRespMuts = initNumRespMuts;
         initPop(run);
         char runNumStr[10];
         sprintf(runNumStr, "%02d", run);

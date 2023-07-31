@@ -22,8 +22,10 @@ double *sdaProbs;
 int seed;
 int runs;
 int maxGens;
-int numTransMuts;
-int numRespMuts;
+int initNumTransMuts;
+int initNumRespMuts;
+int curNumTransMuts;
+int curNumRespMuts;
 int dynamicMutOperator;
 int tournSize;
 int seqNum;
@@ -117,10 +119,10 @@ int getArgs(char *arguments[]) {
     runs = stoi(arg, &pos);
     arg = arguments[6]; // maxGens
     maxGens = stoi(arg, &pos);
-    arg = arguments[7]; // numTransMuts
-    numTransMuts = stoi(arg, &pos);
-    arg = arguments[8]; // numRespMuts
-    numRespMuts = stoi(arg, &pos);
+    arg = arguments[7]; // initNumTransMut
+    initNumTransMuts = stoi(arg, &pos);
+    arg = arguments[8]; // initNumRespMut
+    initNumRespMuts = stoi(arg, &pos);
     arg = arguments[9]; // dynamicMutOperator
     dynamicMutOperator = stoi(arg, &pos);
     arg = arguments[10]; // seqNum
@@ -210,8 +212,8 @@ int makeReadMe(ostream &outp) {
     outp << "Crossover Operator: " << (crossoverOp == 0 ? "Two-Point Crossover" : "One-State Crossover") << endl;
     outp << "Crossover Rate: " << (int) (crossoverRate * 100) << "%" << endl;
     outp << "Mutation Rate: " << (int) (mutationRate * 100) << "%" << endl;
-    outp << "Default Number of Transition Mutations: " << numTransMuts << endl;
-    outp << "Default Number of Response Mutations: " << numRespMuts << endl;
+    outp << "Default Number of Transition Mutations: " << initNumTransMuts << endl;
+    outp << "Default Number of Response Mutations: " << initNumRespMuts << endl;
     if (dynamicMutOperator == 0){
         outp << "Static Number of Mutations" << endl;
     } else {
@@ -319,8 +321,8 @@ int matingEvent(bool biggerBetter) {
 
     if (drand48() < mutationRate) {
         if (dynamicMutOperator == 0){
-            child1.mutate(numTransMuts, numRespMuts);
-            child2.mutate(numTransMuts, numRespMuts);
+            child1.mutate(curNumTransMuts, curNumRespMuts);
+            child2.mutate(curNumTransMuts, curNumRespMuts);
         }
     }
 
