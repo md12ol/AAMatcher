@@ -14,14 +14,15 @@
  * 7.   Default Number of Transition Mutations
  * 8.   Default Number of Response Mutations
  * 9.   Dynamic Mutation Operator? (0 -> static, >0 -> dynamic implementation to use)
- * 10.  Sequence number
- * 11.  Tournament size
- * 12.  Crossover operator
- * 13.  Crossover Rate
- * 14.  Mutation Rate
- * 15.  Culling Rate
- * 16.  Random Culling
- * 17.  Culling Every _ Reporting Intervals
+ * 10.  Upper Bound on Mutations
+ * 11.  Sequence number
+ * 12.  Tournament size
+ * 13.  Crossover operator
+ * 14.  Crossover Rate
+ * 15.  Mutation Rate
+ * 16.  Culling Rate
+ * 17.  Random Culling
+ * 18.  Culling Every _ Reporting Intervals
  *
  * @param argc
  * @param argv

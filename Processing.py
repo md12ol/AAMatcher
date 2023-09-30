@@ -5,7 +5,7 @@ from operator import itemgetter
 import matplotlib.pyplot as plt
 import numpy as np
 
-inp = "../../Conferences and Papers/2023 SSCI/GOOD/AAMTestOut 20St/"
+inp = "./AAMTestOut/"
 outp = "./AAMTestFigs/"
 finame = "exp.dat"
 samps = 50
@@ -286,7 +286,7 @@ def main():
             pass
         pass
 
-    sequences = gen_sequences("../src/Sequences.dat")
+    sequences = gen_sequences("./Sequences.dat")
     for idx in range(len(sequences)):
         sequences[idx] = DNA_to_int(sequences[idx])
         print(len(sequences[idx]))
@@ -313,12 +313,12 @@ def main():
 
     exp_lbls = []
     exp_num = 1
-    for dir in exp_dirs[4]:
+    for dir in exp_dirs[8]:
         lbl = ""
         fields = dir.rstrip().split(",")
         lbl += str(exp_num).zfill(2) + "("
-        lbl += str(int(fields[3].lstrip().split("NTM")[0])).zfill(3) + ", "
-        lbl += str(int(fields[4].lstrip().split("NRM")[0])).zfill(3) + ", "
+        lbl += str(int(fields[3].lstrip().split("NTM")[0])) + ", "
+        lbl += str(int(fields[4].lstrip().split("NRM")[0])) + ", "
         if dir.__contains__("Static"):
             lbl += "Static, "
         else:
@@ -354,17 +354,17 @@ def main():
             pass
         pass
 
-    title = "Sequence Matching with Sequence "
+    title = "Sequence Matching using Sequence "
     # xsp = [[i for i in range(len(all_data[0]))], [i for i in range(len(all_data[1]))]]
     # xpos = [xsp[0], xsp[1], xsp[0], xsp[1], xsp[0], xsp[1], xsp[0], xsp[1]]
     ylb = "Fitness"
-    xlb = "Experiment (Initial Transition Mutations, Initial Response Mutations, Mutation Rate Updater, Culling Every)"
+    xlb = "Experiment (Initial Transition Mutations, Initial Response Mutations, Mutation Spread Adjuster, Culling Every)"
 
     lxpos = []
-    for i in range(6, len(mode_stats[0]), 6):
+    for i in range(10, len(mode_stats[0]), 10):
         lxpos.append(i + 0.5)
         pass
-    colors = ['#FF88FF', '#FF8888', '#FFFF88', '#0088FF', '#008888', '#00FF88']
+    colors = ['#FF88FF', '#FF8888', '#FFFF88', '#0088FF', '#008888', '#00FF88', '#FF8800', '#FF00FF', '#880088', '#88FF44']
     for gidx, ginfo in enumerate(groups):
         if len(mode_stats[gidx]) > 0:
             seq_id = int(ginfo[0][3:])
@@ -390,7 +390,7 @@ def main():
             bp = plot.boxplot(mode_stats[gidx], patch_artist=True)
             box_plot(bp, 1, [[[i for i in range(len(mode_stats[gidx]))], colors]])
 
-            plot.set_xticks([1,2])
+            plot.set_xticks([x + 1 for x in range(len(exp_lbls))])
             plot.set_xticklabels(exp_lbls, rotation=90)
 
             new_title = title + str(seq_id) + " with " + num_states + " States and " + popsize + " Population Size"

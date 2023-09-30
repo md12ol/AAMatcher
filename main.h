@@ -26,6 +26,7 @@ int initNumTransMuts;
 int initNumRespMuts;
 int curNumTransMuts;
 int curNumRespMuts;
+int upBoundMuts;
 int dynamicMutOperator;
 int tournSize;
 int seqNum;
@@ -125,21 +126,23 @@ int getArgs(char *arguments[]) {
     initNumRespMuts = stoi(arg, &pos);
     arg = arguments[9]; // dynamicMutOperator
     dynamicMutOperator = stoi(arg, &pos);
-    arg = arguments[10]; // seqNum
+    arg = arguments[10]; // upBoundMuts
+    upBoundMuts = stoi(arg, &pos);
+    arg = arguments[11]; // seqNum
     seqNum = stoi(arg, &pos);
-    arg = arguments[11]; // tournSize
+    arg = arguments[12]; // tournSize
     tournSize = stoi(arg, &pos);
-    arg = arguments[12]; // crossoverOp
+    arg = arguments[13]; // crossoverOp
     crossoverOp = stoi(arg, &pos);
-    arg = arguments[13]; // crossoverRate
+    arg = arguments[14]; // crossoverRate
     crossoverRate = stod(arg, &pos);
-    arg = arguments[14]; // mutationRate
+    arg = arguments[15]; // mutationRate
     mutationRate = stod(arg, &pos);
-    arg = arguments[15]; // cullingRate
+    arg = arguments[16]; // cullingRate
     cullingRate = stod(arg, &pos);
-    arg = arguments[16]; // randomCulling
+    arg = arguments[17]; // randomCulling
     randomCulling = stoi(arg, &pos) == 1;
-    arg = arguments[17];
+    arg = arguments[18];
     CULLING_EVERY = stoi(arg, &pos);
     cout << "Arguments Captured!" << endl;
     return 0;

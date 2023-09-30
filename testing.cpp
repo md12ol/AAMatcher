@@ -29,14 +29,17 @@ int main(int argc, char *argv[]) {
 //            (crossoverOp == 0 ? "2Pt" : "1St"), (int) (crossoverRate * 100), (int) (mutationRate * 100),
 //            (int) (cullingRate * 100), (randomCulling ? "Rand" : "Worst"), CULLING_EVERY);
     sprintf(pathToOut, "./AAMTestOut/AAMatch on Seq%d with %.1fmilMMEs, %04dPS, %02dSt, %02dNTM, %02dNRM, %s,"
-                       " %dTS, %sCO, %03d%%CrR, %03d%%MR, %03d%%CuR, %sCu, %dCE, MIN/", seqNum, (double) maxGens / 1000000,
-            popsize, sdaStates, initNumTransMuts, initNumRespMuts, dynamicMessage, tournSize,
+                       " %02dUBM, %dTS, %sCO, %03d%%CrR, %03d%%MR, %03d%%CuR, %sCu, %dCE, MIN/", seqNum, (double) maxGens / 1000000,
+            popsize, sdaStates, initNumTransMuts, initNumRespMuts, dynamicMessage, upBoundMuts, tournSize,
             (crossoverOp == 0 ? "2Pt" : "1St"), (int) (crossoverRate * 100), (int) (mutationRate * 100),
             (int) (cullingRate * 100), (randomCulling ? "Rand" : "Worst"), CULLING_EVERY);
 
     bool DO_MUT_CROSS_CHECKS = (popsize <= 50);
     bool DO_SDA_CHECKS = true;
     bool DO_GENE_CHECK = (sdaStates <= 5);
+    DO_MUT_CROSS_CHECKS = false;
+    DO_SDA_CHECKS = false;
+    DO_GENE_CHECK = false;
 
     mkdir(pathToOut, 0777);
     if (DO_MUT_CROSS_CHECKS) {
@@ -103,7 +106,7 @@ int main(int argc, char *argv[]) {
         int stallCount = 0;
         double best = (BIGGER_BETTER ? 0 : MAXFLOAT);
 
-//        while (gen <= maxGens && stallCount < TERM_CRIT ) {
+//        while (gen <= maxGens && stallCount < TERM_CRIT) {
         while (gen <= maxGens && (stallCount < TERM_CRIT || gen < 0.5 * maxGens)) {
             matingEvent(BIGGER_BETTER, gen, runGains);
 

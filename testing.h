@@ -4,17 +4,17 @@
 
 /**
  * This method updates the numTransMuts and numRespMuts through out the GA process
- * utilizing dynamic methods to increase and decrease the number of mutation being perfomred during a set of mating events
+ * utilizing dynamic methods to increase and decrease the number of mutation being performed during a set of mating events
 */
 
 #define TEST_EVERY 500000
 
 int updateMutSpread(int dmo) {
     if (dmo == 1) { // increase number of transition mutations & decrease number of response mutations
-        if (curNumTransMuts < 50) curNumTransMuts++;
+        if (curNumTransMuts < upBoundMuts) curNumTransMuts++;
         if (curNumRespMuts > 0) curNumRespMuts--;
     } else if (dmo == 2) { // increase number of response mutations & decrease number of trasnsition mutations
-        if (curNumRespMuts < 50) curNumRespMuts++;
+        if (curNumRespMuts < upBoundMuts) curNumRespMuts++;
         if (curNumTransMuts > 0) curNumTransMuts--;
     } else {// alter the variables based on fitness improvment
         // calculate amount of change between previous and current best fitness
@@ -23,12 +23,12 @@ int updateMutSpread(int dmo) {
 
         if (dmo == 3) {
             if (change == 0) { // if change equlas zero increase explorative ability of the GA
-                if (curNumRespMuts - 1 < 50) curNumRespMuts += 2;
-                if (curNumTransMuts - 1 < 50) curNumTransMuts += 2;
+                if (curNumRespMuts < upBoundMuts) curNumRespMuts += 1;
+                if (curNumTransMuts < upBoundMuts) curNumTransMuts += 1;
                 // if there was a change, decrease the amount of exploration and increase the amount of exploitation
-            } else if (curNumRespMuts - 1 > 0 && curNumTransMuts - 1 > 0) {
-                curNumRespMuts -= 2;
-                curNumTransMuts -= 2;
+            } else if (curNumRespMuts > 0 && curNumTransMuts > 0) {
+                curNumRespMuts -= 1;
+                curNumTransMuts -= 1;
             }
         } else {
             if (prevBestFitness != populationBestFit)
@@ -36,10 +36,10 @@ int updateMutSpread(int dmo) {
             else RICounter++;// else increase reporting interval counter
             // add the report interval counter to number of mutations performed to increase exploration
             if (RICounter != 0) {
-                if (curNumRespMuts + RICounter <= 50) curNumRespMuts += RICounter;
-                else curNumRespMuts = 50;// place a cap on the number of mutations that can be performed
-                if (curNumTransMuts + RICounter <= 50) curNumTransMuts += RICounter;
-                else curNumTransMuts = 50;// place cap on the number of mutations that can be performed
+                if (curNumRespMuts + RICounter <= upBoundMuts) curNumRespMuts += RICounter;
+                else curNumRespMuts = upBoundMuts;// place a cap on the number of mutations that can be performed
+                if (curNumTransMuts + RICounter <= upBoundMuts) curNumTransMuts += RICounter;
+                else curNumTransMuts = upBoundMuts;// place cap on the number of mutations that can be performed
             } else {// reset the number of mutations to allow for exploration of the improvement
                 curNumRespMuts = initNumRespMuts;
                 curNumTransMuts = initNumTransMuts;

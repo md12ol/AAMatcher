@@ -1,5 +1,6 @@
 import copy
 import os
+import gc
 
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
@@ -10,7 +11,7 @@ from matplotlib.patches import Patch
 from matplotlib import colors
 
 # inp = "../../Conferences and Papers/2023 CIBCB/AAMatcher/AAMOut/"
-inp = "./AAMTestOut/"
+inp = "./AAMTestOut3/"
 outp = "./AAMTestFigs/"
 finame1 = "crossover01_start.dat"
 finame2 = "crossover01_end.dat"
@@ -25,6 +26,8 @@ def process_readme(filename: str):
     with open(filename) as f:
         lines = f.readlines()
         for line in lines:
+            if line.__contains__("length"):
+                seq_len = int(line.split("):")[0].split()[-1])
             if line.__contains__("States"):
                 sda_states = int(line.rstrip().split(":")[1].strip())
                 pass
@@ -50,9 +53,12 @@ def process_readme(filename: str):
                     mutChange = "Dynamic " + str(int(line.rstrip().split(":")[1].strip()))
                     pass
                 pass
+            if line.__contains__("Culling Every:"):
+                cull_every = int(line.split(": ")[1].split()[0].rstrip())
+                pass
             pass
         pass
-    return popsize, sda_states, sda_chars, crossOp, numTransMuts, numRespMuts, mutChange
+    return popsize, sda_states, sda_chars, crossOp, numTransMuts, numRespMuts, mutChange, seq_len, cull_every
 
 
 def process_exp(filename: str, sda_states: int, sda_chars: int) -> []:
@@ -214,7 +220,7 @@ def get_data(filename: str, popsize: int, both: bool):
 
 
 def make_boxplot(data: [], fits: [], parent_diff: [], first_parent: int, out_path: str, run: int, num_gens: int,
-                 popsize: int, metadata: list):
+                 popsize: int, metadata: list, goal_val):
     data = copy.deepcopy(data)
     plt.style.use("seaborn-v0_8")
     plt.rc('xtick', labelsize=10)
@@ -281,8 +287,15 @@ def make_boxplot(data: [], fits: [], parent_diff: [], first_parent: int, out_pat
     posb = plot.bar(pos_xs, pos_bars, color="#57DB80", zorder=0.9)
     negb = plot.bar(neg_xs, neg_bars, color="#DB5F57", zorder=0.9)
 
-    labels = ["Parent's Fitness", "Children's Fitness",
-              "Mean of Children's Fitness \u2212 Mean of Parents' Fitness"]
+    labels = []
+    if metadata[1].__contains__("Mutation"):
+        labels = ["Parent's Fitness", "Children's Fitness",
+                  "Mean of Children's Fitness \u2212 Parent's Fitness"]
+        pass
+    else:
+        labels = ["Parent's Fitness", "Children's Fitness",
+                  "Mean of Children's Fitness \u2212 Mean of Parents' Fitness"]
+        pass
     patches = []
     patches.append(sp)
     patches.append(Patch(color="#5770DB", label="Children's Fitness"))
@@ -307,12 +320,13 @@ def make_boxplot(data: [], fits: [], parent_diff: [], first_parent: int, out_pat
                    " Mating Events", fontsize=14)
         plot.set_xlabel("With Parent", fontsize=12)
         pass
-    plot.axhline(y=87, color="#0000FF", linestyle="--", linewidth="0.75")
 
-    plt.ylim(-15, 100)
+    plot.axhline(y=goal_val, color="#0000FF", linestyle="--", linewidth="0.75")
+
+    plt.ylim(-15, goal_val + 5)
     plt.xlim(0, 51)
     plt.xticks([x for x in range(2, 52, 2)])
-    plt.yticks([y for y in range(-10, 100, 10)])
+    plt.yticks([y for y in range(-10, goal_val + 5, 10)])
     f.subplots_adjust(bottom=0.1, top=0.93, left=0.03, right=0.99)
     if first_parent > -1:
         f.savefig(out_path + metadata[1] + "_Run" + str(run).zfill(2) + "_P" + str(first_parent + 1).zfill(2) +
@@ -366,7 +380,7 @@ def make_graph(el: [], out_file: str, verts: int):
     pass
 
 
-def make_convergence_plot(folder: str, run_num: int, out_path, num_gens):
+def make_convergence_plot(folder: str, run_num: int, out_path, num_gens, cull_every):
     means = []
     bests = []
     with open(folder + "run" + str(run_num).zfill(2) + ".dat") as f:
@@ -432,11 +446,17 @@ def make_convergence_plot(folder: str, run_num: int, out_path, num_gens):
     plot.plot(xs, bests, label="Best Population Fitness", color='blue')
     plot.set_xlabel("Mating Event", fontsize=12)
     plot.set_ylabel("Fitness", fontsize=12)
-    f.suptitle("Convergence for Run " + str(run_num), fontsize=14)
+    f.suptitle("Convergence Plot", fontsize=14)
+
+    xlocs = [x for x in range(0, num_gens, cull_every)]
+    for x in xlocs:
+        plot.axvline(x, color='gray', linewidth=0.5)
+        pass
     plot.legend(facecolor='white', frameon='true', fontsize=12, framealpha=0.75,
                 loc='lower right', ncol=2, borderaxespad=0.1)
     f.subplots_adjust(bottom=0.11, top=0.93, left=0.05, right=0.99)
     f.savefig(out_path + ".png", dpi=500)
+    plt.close()
     pass
 
 
@@ -495,6 +515,7 @@ def make_heatmap(sda_infos: list, num_states, num_chars, out_path, num_gens, run
         pass
     f.subplots_adjust(bottom=0.07, top=0.94, left=0.10, right=1.05)
     f.savefig(out_path + "trans_heatmap" + str(num_gens).zfill(8) + ".png", dpi=500)
+    plt.close()
     pass
 
 
@@ -530,7 +551,7 @@ def main():
             pass
         out_path += "/"
 
-        popsize, sda_states, sda_chars, crossOp, trans_muts, resp_muts, dynamic_muts = process_readme(
+        popsize, sda_states, sda_chars, crossOp, trans_muts, resp_muts, dynamic_muts, seq_len, cull_every = process_readme(
             inp + fold + "/read.me")
         best_run, init_state, init_char, sda_trans, sda_resps = process_best(inp + fold + "/best.dat",
                                                                              sda_states, sda_chars)
@@ -587,7 +608,8 @@ def main():
 
                 mean_diff = [np.mean(all_children_fits_for_parent[i]) - ds[1][i] for i in range(popsize)]
                 make_boxplot(all_children_fits_for_parent, ds[1], mean_diff, -1, out_path, best_run, ds[2], popsize,
-                             [crossOp, "Crossover"])
+                             [crossOp, "Crossover"], seq_len)
+                gc.collect()
                 pass
             pass
 
@@ -618,7 +640,8 @@ def main():
                     pass
 
                 make_boxplot(ds[0], ds[1], parent_child_diff, -2, out_path, best_run, num_gens, popsize,
-                             ["Sets of " + str(trans_muts) + ", " + str(resp_muts) + " Mutations", "Mutation"])
+                             ["Sets of " + str(trans_muts) + ", " + str(resp_muts) + " Mutations", "Mutation"], seq_len)
+                gc.collect()
                 pass
             pass
 
@@ -653,10 +676,11 @@ def main():
             #                str(num_gens).zfill(8) + "_" + str(sda_idx + 1).zfill(2), sda_states)
             #     pass
             make_heatmap(sda_infos, sda_states, sda_chars, out_path, num_gens, best_run)
+            gc.collect()
         pass
 
         # Convergence for Best Run
-        make_convergence_plot(inp + fold + "/", best_run, out_path, sda_batches[-1][1])
+        make_convergence_plot(inp + fold + "/", best_run, out_path, sda_batches[-1][1], cull_every)
 
         # SDA Genes Check
         if os.path.exists(inp + fold + "/SDA Genes/"):
@@ -702,6 +726,7 @@ def main():
                     multi_fits.append(sda_fits)
                     pass
                 process_genes(comparison_types, multi_outputs, multi_fits, out_path, best_run, num_gens)
+                gc.collect()
                 pass
             pass
         pass
