@@ -286,7 +286,7 @@ def main():
             pass
         pass
 
-    sequences = gen_sequences("./Sequences.dat")
+    sequences = gen_sequences("../Sequences.dat")
     for idx in range(len(sequences)):
         sequences[idx] = DNA_to_int(sequences[idx])
         print(len(sequences[idx]))
