@@ -13,6 +13,7 @@ using namespace std;
 #define TERM_CRIT 50
 int CULLING_EVERY;
 #define BIGGER_BETTER (bool)true
+double MIN_GEN_RATIO = 0.5;
 
 // Experiment Parameters
 int popsize;

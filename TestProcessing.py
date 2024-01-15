@@ -10,9 +10,9 @@ from matplotlib.legend_handler import HandlerTuple
 from matplotlib.patches import Patch
 from matplotlib import colors
 
-# inp = "../../Conferences and Papers/2023 CIBCB/AAMatcher/AAMOut/"
-inp = "./AAMTestOut3/"
-outp = "./AAMTestFigs/"
+# inp = "../../Conferences and Papers/2023 CIBCB/AAMatcher/OldTestData/"
+inp = "./SSCITestData/"
+outp = "./SSCITestFigs/"
 finame1 = "crossover01_start.dat"
 finame2 = "crossover01_end.dat"
 samps = 200  # 2 for each 100 tests

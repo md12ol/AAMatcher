@@ -23,14 +23,9 @@ int main(int argc, char *argv[]) {
     cmdLineIntro(cout);
     char dynamicMessage[20];
     sprintf(dynamicMessage, "%s%d", (dynamicMutOperator == 0 ? "Static" : "Dynamic"), dynamicMutOperator);
-//    sprintf(pathToOut, "./AAMTestOut/AAMatch on Seq%d with %.1fmilMMEs, %04dPS, %02dSt, %02dNTM, %02dNRM, %s,"
-//                       " %dTS, %sCO, %03d%%CrR, %03d%%MR, %03d%%CuR, %sCu, %dCE/", seqNum, (double) maxGens / 1000000,
-//            popsize, sdaStates, initNumTransMuts, initNumRespMuts, dynamicMessage, tournSize,
-//            (crossoverOp == 0 ? "2Pt" : "1St"), (int) (crossoverRate * 100), (int) (mutationRate * 100),
-//            (int) (cullingRate * 100), (randomCulling ? "Rand" : "Worst"), CULLING_EVERY);
-    sprintf(pathToOut, "./AAMTestOut/AAMatch on Seq%d with %.1fmilMMEs, %04dPS, %02dSt, %02dNTM, %02dNRM, %s,"
-                       " %02dUBM, %dTS, %sCO, %03d%%CrR, %03d%%MR, %03d%%CuR, %sCu, %dCE, MIN/", seqNum, (double) maxGens / 1000000,
-            popsize, sdaStates, initNumTransMuts, initNumRespMuts, dynamicMessage, upBoundMuts, tournSize,
+    sprintf(pathToOut, "./AAMOut/AAMatch on Seq%d with %.1fmilMMEs, %04dPS, %02dSt, %02dNTM, %02dNRM, %s,"
+                       " %dTS, %sCO, %03d%%CrR, %03d%%MR, %03d%%CuR, %sCu, %dCE/", seqNum, (double) maxGens / 1000000,
+            popsize, sdaStates, initNumTransMuts, initNumRespMuts, dynamicMessage, tournSize,
             (crossoverOp == 0 ? "2Pt" : "1St"), (int) (crossoverRate * 100), (int) (mutationRate * 100),
             (int) (cullingRate * 100), (randomCulling ? "Rand" : "Worst"), CULLING_EVERY);
 

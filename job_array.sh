@@ -4,7 +4,7 @@
 # A simple test table can be generated with
 # for ((i=1; i<=4; i++)); do echo "sleep $(($RANDOM % 30))"; done > table.dat
 
-export TABLE=tableBeluga1.dat
+export TABLE=table.dat
 
 # Total number of cases (= number of jobs to submit):
 N_cases=$(cat "$TABLE" | wc -l)

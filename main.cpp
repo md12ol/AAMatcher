@@ -33,6 +33,7 @@ int main(int argc, char *argv[]) {
     string pathToSeqs = "./Sequences.dat";
     string filename;
     ofstream runStats, expStats, readMe;
+
     vector<double> bests;
     bests.reserve(runs);
     double expBestFit = (BIGGER_BETTER ? 0 : MAXFLOAT);
@@ -43,10 +44,10 @@ int main(int argc, char *argv[]) {
     char dynamicMessage[20];
     sprintf(dynamicMessage, "%s%d", (dynamicMutOperator == 0 ? "Static" : "Dynamic"), dynamicMutOperator);
     sprintf(pathToOut, "./AAMOut/AAMatch on Seq%d with %.1fmilMMEs, %04dPS, %02dSt, %02dNTM, %02dNRM, %s,"
-                       " %dTS, %sCO, %03d%%CrR, %03d%%MR, %03d%%CuR, %sCu/", seqNum, (double) maxGens / 1000000,
+                       " %dTS, %sCO, %03d%%CrR, %03d%%MR, %03d%%CuR, %sCu, %dCE/", seqNum, (double) maxGens / 1000000,
             popsize, sdaStates, initNumTransMuts, initNumRespMuts, dynamicMessage, tournSize,
             (crossoverOp == 0 ? "2Pt" : "1St"), (int) (crossoverRate * 100), (int) (mutationRate * 100),
-            (int) (cullingRate * 100), (randomCulling ? "Rand" : "Worst"));
+            (int) (cullingRate * 100), (randomCulling ? "Rand" : "Worst"), CULLING_EVERY);
     mkdir(pathToOut, 0777);
     expStats.open(string(pathToOut) + "./exp.dat", ios::out);
     readMe.open(string(pathToOut) + "./read.me", ios::out);
@@ -58,7 +59,7 @@ int main(int argc, char *argv[]) {
         curNumTransMuts = initNumTransMuts;
         curNumRespMuts = initNumRespMuts;
         initPop(run);
-        char runNumStr[10];
+        char runNumStr[20];
         sprintf(runNumStr, "%02d", run);
         filename = string(pathToOut) + "run" + string(runNumStr) + ".dat";
         runStats.open(filename, ios::out);
@@ -69,7 +70,7 @@ int main(int argc, char *argv[]) {
         int gen = 1;
         int stallCount = 0;
         double best = (BIGGER_BETTER ? 0 : MAXFLOAT);
-        while (gen <= maxGens && stallCount < TERM_CRIT) {
+        while (gen <= maxGens && (stallCount < TERM_CRIT || gen < MIN_GEN_RATIO * maxGens)) {
             matingEvent(BIGGER_BETTER);
 
             if (gen % REPORT_EVERY == 0) {

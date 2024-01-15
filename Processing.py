@@ -5,8 +5,8 @@ from operator import itemgetter
 import matplotlib.pyplot as plt
 import numpy as np
 
-inp = "./AAMTestOut/"
-outp = "./AAMTestFigs/"
+inp = "./SSCITestData/"
+outp = "./SSCITestFigs/"
 finame = "exp.dat"
 samps = 50
 precision = 6
@@ -320,9 +320,9 @@ def main():
         lbl += str(int(fields[3].lstrip().split("NTM")[0])) + ", "
         lbl += str(int(fields[4].lstrip().split("NRM")[0])) + ", "
         if dir.__contains__("Static"):
-            lbl += "Static, "
+            lbl += "S_, "
         else:
-            lbl += fields[5].rstrip() + ", "
+            lbl += 'D' + fields[5].rstrip().split('c')[1] + ", "
             pass
         lbl += str(int(fields[12].lstrip().split("CE")[0])) + ")"
         exp_lbls.append(lbl)
@@ -358,7 +358,9 @@ def main():
     # xsp = [[i for i in range(len(all_data[0]))], [i for i in range(len(all_data[1]))]]
     # xpos = [xsp[0], xsp[1], xsp[0], xsp[1], xsp[0], xsp[1], xsp[0], xsp[1]]
     ylb = "Fitness"
-    xlb = "Experiment (Initial Transition Mutations, Initial Response Mutations, Mutation Spread Adjuster, Culling Every)"
+    x_title = ('Experiment (Init. Trans. Muts., Init. Resp. Muts., Dynamic or Static Mutation, '
+               'Culling Every)')
+    xlb = x_title
 
     lxpos = []
     for i in range(10, len(mode_stats[0]), 10):
@@ -379,8 +381,8 @@ def main():
             f.close()
 
             plt.style.use("seaborn-v0_8")
-            plt.rc('xtick', labelsize=8)
-            plt.rc('ytick', labelsize=8)
+            plt.rc('xtick', labelsize=12)
+            plt.rc('ytick', labelsize=12)
 
             f = plt.figure()
             f.set_figheight(4.5)
@@ -395,8 +397,8 @@ def main():
 
             new_title = title + str(seq_id) + " with " + num_states + " States and " + popsize + " Population Size"
             f.suptitle(new_title, fontsize=14)
-            plot.set_xlabel(xlb, fontsize=10)
-            plot.set_ylabel(ylb, fontsize=10)
+            plot.set_xlabel(xlb, fontsize=12)
+            plot.set_ylabel(ylb, fontsize=12)
 
             # plot.hlines(y=0.2, xmin=0.5, xmax=20, linewidth=2, color='r')
             plot.hlines(y=len(sequences[seq_id]), xmin=0.5, xmax=len(mode_stats[gidx]) + 0.5, color="#0000FF",
