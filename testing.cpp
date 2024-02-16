@@ -9,7 +9,7 @@
  */
 
 int main(int argc, char *argv[]) {
-    getArgs(argv);
+    getArgs(0, argv);
     string pathToSeqs = "./Sequences.dat";
     char filename[200];
     ofstream runStats, expStats, readMe, crossFile, mutateFile, sdaFile, runGains, runGenes;
@@ -150,12 +150,12 @@ int main(int argc, char *argv[]) {
             gen++;
         }
 
-        tmp = runReport(expStats, BIGGER_BETTER);
-        if ((BIGGER_BETTER && fits[tmp] > expBestFit) || (!BIGGER_BETTER && fits[tmp] < expBestFit)) {
-            expBestFit = fits[tmp];
+        tmp = runReport(expStats, BIGGER_BETTER, pair<int, int>());
+        if ((BIGGER_BETTER && matchFits[tmp] > expBestFit) || (!BIGGER_BETTER && matchFits[tmp] < expBestFit)) {
+            expBestFit = matchFits[tmp];
             expBestSDA.copy(pop[tmp]);
         }
-        bests.push_back(fits[tmp]);
+        bests.push_back(matchFits[tmp]);
         runStats.close();
         runGains.close();
 

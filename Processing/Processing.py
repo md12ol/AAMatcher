@@ -4,13 +4,20 @@ from operator import itemgetter
 
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.colors import LinearSegmentedColormap
+from matplotlib.patches import Patch
+from matplotlib import colors
 
-inp = "./SSCITestData/"
-outp = "./SSCITestFigs/"
+inp = "./AAMOut/"
+outp = "./AAMFigs/"
 finame = "exp.dat"
 samps = 50
 precision = 6
 col_width = 8 + precision
+sda_states = 20
+sda_chars = 4
+alphabet = ['G', 'C', 'A', 'T']
+cull_every = 5
 
 
 def writeStat(data: [], out, lower_better):
@@ -57,20 +64,21 @@ def make_table(many_data: [], best_run, exp_info: [], fname: str, minimizing: bo
 
 
 def box_plot(bp, num_splits: int, split_info: []):
+    color = "#2e294e"
     for whisker in bp['whiskers']:
-        whisker.set(color='#8B008B', linewidth=1)
+        whisker.set(color=color, linewidth=1.5)
         pass
 
     for cap in bp['caps']:
-        cap.set(color='#8B008B', linewidth=1)
+        cap.set(color=color, linewidth=1.5)
         pass
 
     for median in bp['medians']:
-        median.set(color='#AAAAAA', linewidth=1)
+        median.set(color=color, linewidth=1.5)
         pass
 
     for flier in bp['fliers']:
-        flier.set(marker='.', color='#e7298a', alpha=0.5, markersize=5)
+        flier.set(marker='*', markeredgecolor=color, alpha=0.5, markersize=6)
         pass
 
     for info in split_info:
@@ -104,7 +112,8 @@ def combine(dir: str, start: str, end: str):
 
 
 def get_data(dir_path: str):
-    fits = []
+    match_fits = []
+    novelty_fits = []
     SDAs = []
     seqs = []
     with open(dir_path + finame) as f:
@@ -114,8 +123,8 @@ def get_data(dir_path: str):
         for line in lines:
             if line.__contains__("best fitness"):
                 line = line.rstrip()
-                line = line.split(" ")
-                fits.append(int(line[-1]))
+                match_fits.append(int(line.split(" is ")[1].split(" matches ")[0]))
+                novelty_fits.append(int(line.split(" novelty ")[1]))
                 pass
             elif line.__contains__(str("Best Match")):
                 line = line.rstrip()
@@ -136,8 +145,11 @@ def get_data(dir_path: str):
         pass
 
     # run number, fitness, profileS, dnaS, edge count
-    if len(fits) != samps:
-        print("ERROR in fits: " + dir_path)
+    if len(match_fits) != samps:
+        print("ERROR in match fits: " + dir_path)
+        pass
+    if len(novelty_fits) != samps:
+        print("ERROR in novelty fits: " + dir_path)
         pass
     if len(SDAs) != samps:
         print("ERROR in SDAs: " + dir_path)
@@ -146,7 +158,9 @@ def get_data(dir_path: str):
         print("ERROR in seqs: " + dir_path)
         pass
 
-    data = [[i + 1, fits[i], SDAs[i], seqs[i]] for i in range(samps)]
+    data = [[i + 1, match_fits[i], novelty_fits[i], SDAs[i], seqs[i]] for i in range(samps)]
+    data.sort(key=itemgetter(2))  # Ascending
+    data.reverse()
     data.sort(key=itemgetter(1))  # Ascending
     data.reverse()
     return data
@@ -260,33 +274,199 @@ def DNA_to_int(seq: str):
         pass
     return rtn
 
+def process_sda(batch: list, sda_states: int, sda_chars: int):
+    sdas, outputs, fits = [], [], []
+    one_sda = []
+    for line in batch:
+        if line.__contains__("SDA"):
+            fit_start = True
+            pass
+        elif fit_start:
+            fit_start = False
+            sda_start = True
+            fits.append(int(line.rstrip().split(": ")[1]))
+            pass
+        elif sda_start and not line.__contains__("-"):
+            sda_start = False
+            line = line.rstrip().split(" ")
+            outputs.append(line)
+            sdas.append(get_sda(one_sda, sda_states, sda_chars))
+            one_sda = []
+        elif sda_start:
+            one_sda.append(str(line))
+            pass
+        pass
+    return sdas, outputs, fits
+
+
+def get_sda(lines: list[str], sda_states: int, sda_chars: int):
+    init_state = int(lines[0].rstrip().split("<")[0].rstrip())
+    init_char = int(lines[0].rstrip().split("-")[1].strip())
+    lines = lines[1:]
+
+    sda_trans = [[] for _ in range(sda_states)]
+    sda_resps = [[] for _ in range(sda_states)]
+    for state in range(sda_states):
+        for char in range(sda_chars):
+            one_resp = []
+            sda_trans[state].append(int(lines[0].split(">")[1].lstrip().split(" ")[0]))
+            line = lines[0].rstrip().split(">")[1].lstrip().split(" ")
+            one_resp.append(int(line[2]))
+            if len(line) == 5:
+                one_resp.append(int(line[3]))
+                pass
+            sda_resps[state].append(one_resp)
+            lines = lines[1:]
+            pass
+        pass
+    return init_state, init_char, sda_trans, sda_resps
+
+
+def make_heatmap(sda_infos: list, num_states, num_chars, out_path, num_gens, run_num, seq, exp):
+    count = [[0 for _ in range(num_states)] for _ in range(num_states * num_chars)]
+    for sda in sda_infos:
+        transitions = sda[2]
+        for st, trans in enumerate(transitions):
+            for ch, tr in enumerate(trans):
+                row = num_chars * st + ch
+                col = tr
+                count[row][col] += 1
+                pass
+            pass
+        pass
+    # out_path = out_path + "Run" + str(run_num).zfill(2) + "/"
+    # if not os.path.exists(out_path):
+    #     os.makedirs(out_path)
+    #     pass
+
+    plt.style.use("seaborn-v0_8")
+    cmap = LinearSegmentedColormap.from_list("thing", ["#2e294e", "#1b998b", "#f46036"], 500)
+
+    f = plt.figure()
+    f.set_figheight(7)
+    f.set_figwidth(7)
+    plot = f.add_subplot(111)
+    hm = plot.imshow(count, aspect='auto', cmap=cmap)
+    # hm = plt.pcolor(count, aspect='auto', cmap=cmap, norm=norm)
+
+    ylbls = []
+    ylocs = []
+    for s in range(num_states):
+        for idx, c in enumerate(alphabet):
+            ylbls.append(c)
+            ylocs.append(s * num_chars + idx)
+            pass
+        pass
+
+    plot.tick_params(axis="y", direction="in", pad=15)
+    plot.set_yticks([y * num_chars + 1.5 for y in range(num_states)], (s + 1 for s in range(num_states)), minor=False,
+                    fontsize=12)
+    plot.set_yticks(ylocs, ylbls, minor=True, fontsize=7)
+    plot.set_xticks([y for y in range(num_states)], (y + 1 for y in range(num_states)), fontsize=12)
+    f.suptitle("Number of SDAs with the Same Transition", fontsize=14)
+    plot.set_title("Sequence " + str(seq) + " - Experiment " + str(exp), fontsize=12)
+
+    plot.set_xlabel("To State", fontsize=12)
+    plot.set_ylabel("From State and the Character Driving Transition", fontsize=12)
+    cbar = plot.figure.colorbar(hm, ax=plot, pad=0.01)
+    plot.grid(None)
+    for y in range(4*num_states):
+        plot.axhline(y=y + 0.5, color="#FFFFFF", linestyle="-", linewidth="0.25")
+        pass
+    for x in range(num_states):
+        plot.axvline(x=x+0.5, color="#FFFFFF", linestyle="-", linewidth="0.25")
+        pass
+    for y in range(3, 4 * num_states, 4):
+        plot.axhline(y=y + 0.5, color="#FFFFFF", linestyle="-", linewidth="1")
+        pass
+    f.subplots_adjust(bottom=0.07, top=0.92, left=0.10, right=1.04)
+    f.savefig(out_path + "Run" + str(run_num) + "Gen" + str(num_gens).zfill(8) + ".png", dpi=300)
+    plt.close()
+    pass
+
+
+def make_convergence_plot(folder: str, run_num: int, out_path, num_gens, cull_every, seq, exp, seq_len):
+    if isinstance(num_gens, list):
+        print("ERROR!")
+        pass
+
+    means = []
+    bests = []
+    novs = []
+    with open(folder + "run" + str(run_num).zfill(2) + ".dat") as f:
+        lines = f.readlines()
+        for line in lines[1:]:
+            the_line = line
+            if line.__contains__(" 1000"):
+                new_line = line.split("1000")[1]
+                the_line = line.split("1000")[0] + "    1000   " + new_line
+                pass
+            means.append(float(the_line.split()[2]))
+            bests.append(int(the_line.split()[5]))
+            novs.append(int(the_line.split()[6]))
+            pass
+        pass
+
+    out_path = out_path + "ConvergenceSeq" + str(seq) + "Exp" + str(exp) + "Run" + str(run_num).zfill(2)
+
+    plt.style.use("seaborn-v0_8")
+    plt.rc('xtick', labelsize=10)
+    plt.rc('ytick', labelsize=10)
+
+    # f = plt.figure()
+    # f.set_figheight(4.5)
+    # f.set_figwidth(10)
+    f, plot = plt.subplots()
+    f.set_figheight(5)
+    f.set_figwidth(9)
+
+    xs = [i for i in range(0, num_gens + 1, 10000)]
+
+    xlocs = [x for x in range(0, num_gens, cull_every * 10000)]
+    for x in xlocs:
+        plot.axvline(x, color='gray', linewidth=0.25, zorder=1)
+        pass
+    plot.hlines(y=seq_len, xmin=0.5, xmax=num_gens + 0.5, color="blue",
+                linestyles="dashed", linewidth=1)
+
+    plot.plot(xs, means, label="Mean Population Match Fitness", color='#f46036', linewidth=1.25)
+    plot.plot(xs, bests, label="Best Population Match Fitness", color='#1b998b', linewidth=1.25)
+    plot.set_xlabel("Mating Event", fontsize=12)
+    plot.set_ylabel("Match Fitness", fontsize=12)
+    ax2 = plot.twinx()
+    ax2.plot(xs, novs, label="Best Population Diversity Fitness", color='#2e294e', linewidth=1.25, alpha=0.7)
+    ax2.set_ylabel("Diversity Fitness", fontsize=12)
+    ax2.grid(None)
+
+    plot.ticklabel_format(style='plain')
+    plot.margins(x=0.01)
+    # ax2.margins(x=0.1)
+    ax2.ticklabel_format(style='plain')
+
+    f.suptitle("Convergence Plot", fontsize=14)
+    plot.set_title("Sequence " + str(seq) + " - Experiment " + str(exp), fontsize=12)
+
+    lines, labels = plot.get_legend_handles_labels()
+    lines2, labels2 = ax2.get_legend_handles_labels()
+    ax2.legend(lines + lines2, labels + labels2, loc=7, facecolor='white', frameon='true',
+               fontsize=10, framealpha=1, ncol=1, borderaxespad=0.1)
+    f.tight_layout()
+    f.savefig(out_path + ".png", dpi=300)
+    plt.close()
+    pass
+
 
 def main():
     print("START")
     folder_names = os.listdir(inp)
     seq_idxs = [0, 1, 2, 3, 4, 5]
-    popsizes = ["0050PS", "0500PS"]
-    states = ["05St", "20St"]
-    trans_muts = ["2NTM", "4NTM"]
-    resp_muts = ["2NRM", "4NRM"]
-    tsize = ["7TS"]
-    crossover = ["2PtCO"]
-    cross_rate = ["050%CrR"]
-    mut_rate = ["100%MR"]
-    cull_rate = ["025%CuR"]
-    cull_every = ["1CE", "5CE"]
-    mut_update = [0,1,2,3,4]
 
     groups = []
     for seq in seq_idxs:
-        for st in states:
-            for ps in popsizes:
-                groups.append(["Seq" + str(seq), st, ps])
-                pass
-            pass
+        groups.append(["Seq" + str(seq)])
         pass
 
-    sequences = gen_sequences("../Sequences.dat")
+    sequences = gen_sequences("./Sequences.dat")
     for idx in range(len(sequences)):
         sequences[idx] = DNA_to_int(sequences[idx])
         print(len(sequences[idx]))
@@ -294,7 +474,7 @@ def main():
         pass
 
     freq_data = get_char_freqs(sequences, num_chars=4)
-    for dat in freq_data[1:]:
+    for dat in freq_data:
         print(freq_data[0])
         print(dat)
         pass
@@ -311,28 +491,34 @@ def main():
         exp_dirs.append(one_exp)
         pass
 
+    for group in exp_dirs:
+        for exp_idx in range(0, len(group) -1, 2):
+            tmp = group[exp_idx]
+            group[exp_idx] = group[exp_idx + 1]
+            group[exp_idx + 1] = tmp
+            pass
+        pass
+
+
     exp_lbls = []
     exp_num = 1
-    for dir in exp_dirs[8]:
-        lbl = ""
-        fields = dir.rstrip().split(",")
-        lbl += str(exp_num).zfill(2) + "("
-        lbl += str(int(fields[3].lstrip().split("NTM")[0])) + ", "
-        lbl += str(int(fields[4].lstrip().split("NRM")[0])) + ", "
-        if dir.__contains__("Static"):
-            lbl += "S_, "
-        else:
-            lbl += 'D' + fields[5].rstrip().split('c')[1] + ", "
+    for exp_idx, exp_dat in enumerate(exp_dirs):
+        for fld in exp_dat:
+            lbl = ""
+            fields = fld.rstrip().split(",")
+            lbl += "Population Size " + str(int(fields[1].lstrip().split("PS")[0]))
+            if lbl not in exp_lbls:
+                exp_lbls.append(lbl)
+                pass
+            exp_num += 1
             pass
-        lbl += str(int(fields[12].lstrip().split("CE")[0])) + ")"
-        exp_lbls.append(lbl)
-        exp_num += 1
         pass
 
     # mode_data[group][exp][run][0] = run num
-    # mode_data[group][exp][run][1] = run's fit (sorted based on this)
-    # mode_data[group][exp][run][2][:] = run's SDA
-    # mode_data[group][exp][run][3] = run's sequence
+    # mode_data[group][exp][run][1] = run's match fit (primary sort)
+    # mode_data[group][exp][run][2] = run's novelty fit (secondary sort)
+    # mode_data[group][exp][run][3][:] = run's SDA
+    # mode_data[group][exp][run][4] = run's sequence
     mode_data = [[] for _ in range(len(exp_dirs))]
     for eidx, exp in enumerate(groups):
         for fld in exp_dirs[eidx]:
@@ -358,21 +544,17 @@ def main():
     # xsp = [[i for i in range(len(all_data[0]))], [i for i in range(len(all_data[1]))]]
     # xpos = [xsp[0], xsp[1], xsp[0], xsp[1], xsp[0], xsp[1], xsp[0], xsp[1]]
     ylb = "Fitness"
-    x_title = ('Experiment (Init. Trans. Muts., Init. Resp. Muts., Dynamic or Static Mutation, '
-               'Culling Every)')
-    xlb = x_title
+    xlb = "Experiment"
 
     lxpos = []
-    for i in range(10, len(mode_stats[0]), 10):
+    for i in range(2, len(mode_stats[0]), 2):
         lxpos.append(i + 0.5)
         pass
-    colors = ['#FF88FF', '#FF8888', '#FFFF88', '#0088FF', '#008888', '#00FF88', '#FF8800', '#FF00FF', '#880088', '#88FF44']
+    colors = ['#f46036', '#1b998b']
     for gidx, ginfo in enumerate(groups):
         if len(mode_stats[gidx]) > 0:
             seq_id = int(ginfo[0][3:])
-            num_states = str(int(ginfo[1][:2]))
-            popsize = str(int(ginfo[2][:4]))
-            f = open(outp + "exp_table" + str(gidx + 1) + ".dat", "w")
+            f = open(outp + "exp_table" + str(gidx) + ".dat", "w")
             for idxx, gr in enumerate(exp_dirs[gidx]):
                 f.write(str(idxx + 1) + "\t")
                 f.write(gr)
@@ -390,26 +572,87 @@ def main():
             plot = f.add_subplot(111)
 
             bp = plot.boxplot(mode_stats[gidx], patch_artist=True)
+            # box_plot(bp, 1, [[[i for i in range(len(mode_stats[gidx]))], colors]])
             box_plot(bp, 1, [[[i for i in range(len(mode_stats[gidx]))], colors]])
 
-            plot.set_xticks([x + 1 for x in range(len(exp_lbls))])
-            plot.set_xticklabels(exp_lbls, rotation=90)
+            plot.tick_params(axis='x', which='major', pad=15)
+            plot.set_xticks([2 * (x + 1) - 0.5 for x in range(len(exp_lbls))], exp_lbls, rotation=0, minor=False,
+                            fontsize=12)
+            plot.set_xticks([x+1 for x in range(len(mode_stats[gidx]))],
+                            [str("Experiment " + str(x + 1)) for x in range(len(mode_stats[gidx]))], minor=True,
+                            fontsize=10)
 
-            new_title = title + str(seq_id) + " with " + num_states + " States and " + popsize + " Population Size"
-            f.suptitle(new_title, fontsize=14)
-            plot.set_xlabel(xlb, fontsize=12)
+            new_title = title + str(seq_id)
+            plot.set_title(new_title, fontsize=14)
+            # plot.set_xlabel(xlb, fontsize=13)
             plot.set_ylabel(ylb, fontsize=12)
 
             # plot.hlines(y=0.2, xmin=0.5, xmax=20, linewidth=2, color='r')
-            plot.hlines(y=len(sequences[seq_id]), xmin=0.5, xmax=len(mode_stats[gidx]) + 0.5, color="#0000FF",
+            plot.hlines(y=len(sequences[seq_id]), xmin=0.5, xmax=len(mode_stats[gidx]) + 0.5, color="#2e294e",
                         linestyles="dashed", linewidth=1)
+
+            labels = ["Tournament Size 7", "Tournament Size 15"]
+            patches = [Patch(facecolor=colors[0], edgecolor="#2e294e",linewidth=1, label=labels[0]),
+                       Patch(facecolor=colors[1], edgecolor="#2e294e", linewidth=1, label=labels[1])]
+            plot.legend(handles=patches, labels=labels, facecolor='white', frameon='true', fontsize=12, framealpha=1,
+                loc='lower center', ncol=2, borderaxespad=0.1)
+
             for x in lxpos:
-                plot.axvline(x=x, color='black', linestyle='--', linewidth=0.75)
+                plot.axvline(x=x, color='#2e294e', linestyle='-.', linewidth=1)
                 pass
             plot.grid(visible="True", axis="y", which='major', color="darkgray", linewidth=0.75)
             f.tight_layout()
-            f.savefig(outp + "AAMatchSeq" + str(seq_id) + ginfo[1] + ginfo[2] + "_boxplot.png", dpi=300)
+            f.savefig(outp + "Boxplot AAMatchSeq" + str(seq_id), dpi=300)
             plt.close()
+            pass
+        pass
+
+    all_sda_batches = []
+    for seq_num, fld_names in enumerate(exp_dirs):
+        one_seq_batches = []
+        for exp_num, fold in enumerate(fld_names):
+            best_SDA_file = inp + fold + "/" + "SDAs" + str(mode_data[seq_num][exp_num][0][0]).zfill(2) + ".dat"
+            one_exp_batches = []
+            num_gens = 0
+            with open(best_SDA_file, "r") as f:
+                lines = f.readlines()
+                one_batch = []
+                for line in lines:
+                    if line.__contains__("Population After"):
+                        if len(one_batch) > 0:
+                            one_exp_batches.append([one_batch, num_gens])
+                            one_batch = []
+                            pass
+                        num_gens = int(line.split("Population After ")[1].split(" Mating Events")[0])
+                        pass
+                    else:
+                        one_batch.append(line)
+                        pass
+                    pass
+                one_exp_batches.append([one_batch, num_gens])
+                pass
+            one_seq_batches.append(one_exp_batches)
+            pass
+        all_sda_batches.append(one_seq_batches)
+        pass
+
+    for seq_idx, seq_batches in enumerate(all_sda_batches):
+        for exp_idx, exp_batches in enumerate(seq_batches):
+            for batch in exp_batches:
+                sda_infos, sda_outputs, sda_fits = process_sda(batch[0], sda_states, sda_chars)
+                num_gens = batch[1]
+                num_gens = int(int(num_gens) / 10) * 10
+                make_heatmap(sda_infos, sda_states, sda_chars, outp + "HeatmapSeq" + str(seq_idx) + "Exp" + str(
+                    exp_idx + 1) , num_gens, mode_data[seq_idx][exp_idx][0][0], seq_idx, exp_idx + 1)
+                pass
+            pass
+        pass
+
+    for seq_num, fld_names in enumerate(exp_dirs):
+        for exp_num, fold in enumerate(fld_names):
+            make_convergence_plot(inp + fold + "/", mode_data[seq_num][exp_num][0][0], outp,
+                                  int(all_sda_batches[seq_num][exp_num][-1][1]), cull_every,
+                                  seq_num, exp_num+1, len(sequences[seq_num]))
             pass
         pass
 

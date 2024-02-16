@@ -18,7 +18,7 @@ int updateMutSpread(int dmo) {
         if (curNumTransMuts > 0) curNumTransMuts--;
     } else {// alter the variables based on fitness improvment
         // calculate amount of change between previous and current best fitness
-        double change = populationBestFit - prevBestFitness;
+        double change = populationBestFit.first - prevBestFitness;
         change = change / prevBestFitness;// calculate percentage increase from previous best fitness
 
         if (dmo == 3) {
@@ -31,7 +31,7 @@ int updateMutSpread(int dmo) {
                 curNumTransMuts -= 1;
             }
         } else {
-            if (prevBestFitness != populationBestFit)
+            if (prevBestFitness != populationBestFit.first)
                 RICounter = 0;// if there is a change in the best fitness value reset counter
             else RICounter++;// else increase reporting interval counter
             // add the report interval counter to number of mutations performed to increase exploration
@@ -45,7 +45,7 @@ int updateMutSpread(int dmo) {
                 curNumTransMuts = initNumTransMuts;
             }
         }
-        prevBestFitness = populationBestFit; // update the previous best population fitness value
+        prevBestFitness = populationBestFit.first; // update the previous best population fitness value
     }
     return 0;
 } // updateMutSpread
@@ -58,10 +58,10 @@ int crossover_all(ostream &outStrm, SDA &parent1, SDA &parent2) {
             child1.copy(parent1);
             child2.copy(parent2);
             child1.twoPointCrossover(child2, cp1, cp2);
-            outStrm << "Child " << count++ << ": " << fitness(child1) << endl;
+            outStrm << "Child " << count++ << ": " << calcMatchFit(child1) << endl;
             child1.printSDA(outStrm);
             child1.rtnOutput(true, outStrm);
-            outStrm << "Child " << count++ << ": " << fitness(child2) << endl;
+            outStrm << "Child " << count++ << ": " << calcMatchFit(child2) << endl;
             child2.printSDA(outStrm);
             child2.rtnOutput(true, outStrm);
         }
@@ -77,18 +77,19 @@ int genetic_diversity_check(ostream &outStrm) {
     secondBestFit = (BIGGER_BETTER ? 0 : INT32_MAX);
     worstFit = (BIGGER_BETTER ? INT32_MAX : 0);
     for (int idx = 0; idx < popsize; ++idx) {
-        if ((BIGGER_BETTER && fits[idx] > bestFit) || (!BIGGER_BETTER && fits[idx] < bestFit)) {
+        if ((BIGGER_BETTER && matchFits[idx] > bestFit) || (!BIGGER_BETTER && matchFits[idx] < bestFit)) {
             secondBestFit = bestFit;
             secondBestIdx = bestIdx;
-            bestFit = (int) fits[idx];
+            bestFit = (int) matchFits[idx];
             bestIdx = idx;
-        } else if ((BIGGER_BETTER && fits[idx] > secondBestFit) || (!BIGGER_BETTER && fits[idx] < secondBestFit)) {
-            secondBestFit = (int) fits[idx];
+        } else if ((BIGGER_BETTER && matchFits[idx] > secondBestFit) ||
+                   (!BIGGER_BETTER && matchFits[idx] < secondBestFit)) {
+            secondBestFit = (int) matchFits[idx];
             secondBestIdx = idx;
         }
 
-        if ((BIGGER_BETTER && fits[idx] < worstFit) || (!BIGGER_BETTER && fits[idx] > worstFit)) {
-            worstFit = (int) fits[idx];
+        if ((BIGGER_BETTER && matchFits[idx] < worstFit) || (!BIGGER_BETTER && matchFits[idx] > worstFit)) {
+            worstFit = (int) matchFits[idx];
             worstIdx = idx;
         }
     }
@@ -120,7 +121,7 @@ int genetic_diversity_check(ostream &outStrm) {
     outStrm << "First SDA: " << bestFit << endl;
     pop[bestIdx].printSDA(outStrm);
     pop[bestIdx].rtnOutput(true, outStrm);
-    outStrm << "Second SDA: " << fitness(parent2) << endl;
+    outStrm << "Second SDA: " << calcMatchFit(parent2) << endl;
     parent2.printSDA(outStrm);
     parent2.rtnOutput(true, outStrm);
     crossover_all(outStrm, parent1, parent2);
@@ -131,7 +132,7 @@ int genetic_diversity_check(ostream &outStrm) {
     outStrm << "First SDA: " << worstFit << endl;
     parent1.printSDA(outStrm);
     parent1.rtnOutput(true, outStrm);
-    outStrm << "Second SDA: " << fitness(parent2) << endl;
+    outStrm << "Second SDA: " << calcMatchFit(parent2) << endl;
     parent2.printSDA(outStrm);
     parent2.rtnOutput(true, outStrm);
     crossover_all(outStrm, parent1, parent2);
@@ -151,21 +152,23 @@ int matingEvent(bool biggerBetter, int currentGen, ostream &outp) {
         if (crossoverOp == 0) child1a.twoPointCrossover(child2a);
         else if (crossoverOp == 1) child1a.oneStateCrossover(child2a);
 
-        fit1a = fitness(child1a);
-        fit2a = fitness(child2a);
+        fit1a = calcMatchFit(child1a);
+        fit2a = calcMatchFit(child2a);
         // If there is an improvement...
-        if (((fit1a > populationBestFit && BIGGER_BETTER) || (fit2a > populationBestFit && BIGGER_BETTER)) ||
-            ((fit1a < populationBestFit && !BIGGER_BETTER) || (fit2a < populationBestFit && !BIGGER_BETTER))) {
+        if (((fit1a > populationBestFit.first && BIGGER_BETTER) ||
+             (fit2a > populationBestFit.first && BIGGER_BETTER)) ||
+            ((fit1a < populationBestFit.first && !BIGGER_BETTER) ||
+             (fit2a < populationBestFit.first && !BIGGER_BETTER))) {
             improvement = true;
             outp << "Crossover Improvement during Mating Event " << currentGen << endl;
             if (BIGGER_BETTER) {
-                outp << populationBestFit << " -> " << max(fit1a, fit2a) << endl;
+                outp << populationBestFit.first << " -> " << max(fit1a, fit2a) << endl;
             } else {
-                outp << populationBestFit << " -> " << min(fit1a, fit2a) << endl;
+                outp << populationBestFit.first << " -> " << min(fit1a, fit2a) << endl;
             }
-            outp << "Parent 1: " << fits[idxs[0]] << endl;
+            outp << "Parent 1: " << matchFits[idxs[0]] << endl;
             pop[idxs[0]].printSDA(outp);
-            outp << "Parent 2: " << fits[idxs[1]] << endl;
+            outp << "Parent 2: " << matchFits[idxs[1]] << endl;
             pop[idxs[1]].printSDA(outp);
             outp << "Child 1: " << fit1a << endl;
             child1a.printSDA(outp);
@@ -179,8 +182,8 @@ int matingEvent(bool biggerBetter, int currentGen, ostream &outp) {
             }
         }
     } else {
-        fit1a = fits[idxs[0]];
-        fit2a = fits[idxs[1]];
+        fit1a = matchFits[idxs[0]];
+        fit2a = matchFits[idxs[1]];
     }
 
     child1b.copy(child1a);
@@ -190,17 +193,19 @@ int matingEvent(bool biggerBetter, int currentGen, ostream &outp) {
         child1b.mutate(curNumTransMuts, curNumRespMuts);
         child2b.mutate(curNumTransMuts, curNumRespMuts);
 
-        fit1b = fitness(child1b);
-        fit2b = fitness(child2b);
+        fit1b = calcMatchFit(child1b);
+        fit2b = calcMatchFit(child2b);
         // If there is an improvement...
-        if (((fit1b > populationBestFit && BIGGER_BETTER) || (fit2b > populationBestFit && BIGGER_BETTER)) ||
-            ((fit1b < populationBestFit && !BIGGER_BETTER) || (fit2b < populationBestFit && !BIGGER_BETTER))) {
+        if (((fit1b > populationBestFit.first && BIGGER_BETTER) ||
+             (fit2b > populationBestFit.first && BIGGER_BETTER)) ||
+            ((fit1b < populationBestFit.first && !BIGGER_BETTER) ||
+             (fit2b < populationBestFit.first && !BIGGER_BETTER))) {
             improvement = true;
             outp << "Mutation Improvement during Mating Event " << currentGen << endl;
             if (BIGGER_BETTER) {
-                outp << populationBestFit << " -> " << max(fit1b, fit2b) << endl;
+                outp << populationBestFit.first << " -> " << max(fit1b, fit2b) << endl;
             } else {
-                outp << populationBestFit << " -> " << min(fit1b, fit2b) << endl;
+                outp << populationBestFit.first << " -> " << min(fit1b, fit2b) << endl;
             }
             outp << "Child 1 Before: " << fit1a << endl;
             child1a.printSDA(outp);
@@ -224,24 +229,24 @@ int matingEvent(bool biggerBetter, int currentGen, ostream &outp) {
     if (improvement) {
         if (fit1a >= fit1b) {
             pop[idxs.end()[-1]] = child1a;
-            fits[idxs.end()[-1]] = fit1a;
+            matchFits[idxs.end()[-1]] = fit1a;
         } else {
             pop[idxs.end()[-1]] = child1b;
-            fits[idxs.end()[-1]] = fit1b;
+            matchFits[idxs.end()[-1]] = fit1b;
         }
         if (fit2a >= fit2b) {
             pop[idxs.end()[-2]] = child2a;
-            fits[idxs.end()[-2]] = fit2a;
+            matchFits[idxs.end()[-2]] = fit2a;
         } else {
             pop[idxs.end()[-2]] = child2b;
-            fits[idxs.end()[-2]] = fit2b;
+            matchFits[idxs.end()[-2]] = fit2b;
         }
     } else {
         pop[idxs.end()[-1]] = child1b;
         pop[idxs.end()[-2]] = child2b;
 
-        fits[idxs.end()[-1]] = fit1b;
-        fits[idxs.end()[-2]] = fit2b;
+        matchFits[idxs.end()[-1]] = fit1b;
+        matchFits[idxs.end()[-2]] = fit2b;
     }
     return 0;
 }
@@ -257,8 +262,8 @@ vector<int> runMultiCross(int numEvents, SDA mom, SDA dad) {
         child2.copy(dad);
         if (crossoverOp == 0) child1.twoPointCrossover(child2);
         else if (crossoverOp == 1) child1.oneStateCrossover(child2);
-        fitVals.push_back((int) fitness(child1));
-        fitVals.push_back((int) fitness(child2));
+        fitVals.push_back((int) calcMatchFit(child1));
+        fitVals.push_back((int) calcMatchFit(child2));
     }
     return fitVals;
 }
@@ -271,7 +276,7 @@ vector<int> runMultiMutate(int numEvents, SDA parent) {
     for (int i = 0; i < numEvents; ++i) {
         child.copy(parent);
         child.mutate(curNumTransMuts, curNumRespMuts);
-        fitVals.push_back((int) fitness(child));
+        fitVals.push_back((int) calcMatchFit(child));
     }
     return fitVals;
 }
@@ -280,7 +285,7 @@ int crossoverCheck(ofstream &outStream) {
     outStream << "Population Fitness Values:" << endl;
 
     for (int i = 0; i < popsize; ++i) {
-        outStream << fits[i] << endl;
+        outStream << matchFits[i] << endl;
     }
 
     outStream << "Population Crossover Checks:" << endl;
@@ -288,7 +293,7 @@ int crossoverCheck(ofstream &outStream) {
     for (int mom = 0; mom < popsize; mom++) {
         for (int dad = mom + 1; dad < popsize; dad++) {
             outStream << "Parent Idxs: " << mom << "\t" << dad << endl;
-            outStream << "Parent Fits: " << fits[mom] << "\t" << fits[dad] << endl;
+            outStream << "Parent Fits: " << matchFits[mom] << "\t" << matchFits[dad] << endl;
             printVector<ofstream, int>(outStream, runMultiCross(mateTests, pop[mom], pop[dad]), "", "\n", true);
         }
     }
@@ -299,14 +304,14 @@ int mutateCheck(ofstream &outStream) {
     outStream << "Population Fitness Values:" << endl;
 
     for (int i = 0; i < popsize; ++i) {
-        outStream << fits[i] << endl;
+        outStream << matchFits[i] << endl;
     }
 
     outStream << "Population Mutation Checks:" << endl;
 
     for (int mom = 0; mom < popsize; mom++) {
         outStream << "Parent Idx: " << mom << endl;
-        outStream << "Parent Fit: " << fits[mom] << endl;
+        outStream << "Parent Fit: " << matchFits[mom] << endl;
         printVector<ofstream, int>(outStream, runMultiMutate(mateTests, pop[mom]), "", "\n", true);
     }
     return 0;
@@ -317,7 +322,7 @@ int sdaCheck(ofstream &outStream, int currentGen) {
 
     for (int sda = 0; sda < popsize; sda++) {
         outStream << "SDA " << sda << endl;
-        outStream << "Fitness: " << fits[sda] << endl;
+        outStream << "Fitness: " << matchFits[sda] << endl;
         pop[sda].printSDA(outStream);
         pop[sda].fillOutput(testSeq, true, outStream);
     }
