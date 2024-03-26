@@ -406,12 +406,6 @@ int matingEvent(bool biggerBetter) {
 
     vector<int> idxs = tournSelect(tournSize, biggerBetter);
 
-//    cout<< "Tourn: ";
-//    for (int i = 0; i < tournSize; i++){
-//        cout << "[" << matchFits[i] << ", " << noveltyFits[i] << "], ";
-//    }
-//    cout << endl;
-
     p1idx = idxs[0];
     p2idx = idxs[1];
     c1idx = idxs.end()[-1];
@@ -468,9 +462,6 @@ int matingEvent(bool biggerBetter) {
         }
     }
 
-//    for (int i = 0; i < popsize; i++){
-//        noveltyFits[i] = calcNoveltyFit(i);
-//    }
     return 0;
 }
 
@@ -559,16 +550,7 @@ int culling(double percentage, bool rndPick, bool biggerBetter) {
 }
 
 int runReport(ostream &outp, bool biggerBetter, pair<int, int> bestFit) {
-//    auto maxIterator = minmax_element(matchFits.begin(), matchFits.end());
-//    int bestIdx;
-//    if (biggerBetter) {
-//        bestIdx = (int) distance(matchFits.begin(), maxIterator.second);
-//    } else {
-//        bestIdx = (int) distance(matchFits.begin(), maxIterator.first);
-//    }
-
     multiStream printAndSave(cout, outp);
-//    printAndSave << "The best fitness is " << matchFits[bestIdx] << "\n";
     printAndSave << "The best fitness is " << bestFit.first;
     printAndSave << " matches with novelty " << bestFit.second << "\n";
     pop[popBestIdx].fillOutput(testSeq);
@@ -649,7 +631,6 @@ int expReport(ostream &outp, vector<pair<int, int>> bestFits, SDA bestSDA, bool 
     printAndSave << "Match Fitness 95% CI: " << stats[0] << " +- " << stats[2] << "\n";
     printAndSave << "Novelty Fitness 95% CI (for best match fitness): ";
     printAndSave << stats2[0] << " +- " << stats2[2] << "\n";
-//    printAndSave << "\n";
     printAndSave << left << setw(20) << "Best Match: ";
     bestSDA.fillOutput(testSeq);
     intToChar(testSeq, charSeq);
@@ -659,7 +640,6 @@ int expReport(ostream &outp, vector<pair<int, int>> bestFits, SDA bestSDA, bool 
     printAndSave << left << setw(20) << "Desired Sequence: ";
     intToChar(goalSeq, charSeq);
     printVector<multiStream, char>(printAndSave, charSeq, "", "", true);
-//    printAndSave << "\nSDA:\n";
     bestSDA.printSDA(cout);
     bestSDA.printSDA(outp);
     return 0;

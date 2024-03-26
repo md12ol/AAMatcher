@@ -81,36 +81,6 @@ int main(int argc, char *argv[]) {
             matingEvent(BIGGER_BETTER);
             if (gen % REPORT_EVERY == 0) {
                 rptVals = report(runStats, run, (int) gen / (REPORT_EVERY), BIGGER_BETTER);
-//                printPopFits(cout);
-//                cout << "[" << populationBestFit.first << ", " << populationBestFit.second << "]" << endl;
-
-//                vector<int> sortedIdxs = tournSelect(popsize, BIGGER_BETTER);
-//                cout << "Fitness Values: ";
-//
-//                bool first = true;
-//                for (int idx: sortedIdxs) {
-//                    if (!first) {
-//                        cout << ", ";
-//                    }
-//                    cout << "[" << matchFits[idx] << ", " << noveltyFits[idx] << "]";
-//                    first = false;
-//                }
-//                cout << "[" << populationBestFit.first << ", " << populationBestFit.second << "]" << endl;
-
-//                cout << "Match Fits: ";
-//                vector<double> thing = matchFits;
-//                sort(thing.begin(), thing.end());
-//                reverse(thing.begin(), thing.end());
-//                for (int i = 0; i < popsize; i++) {
-//                    cout << setw(2) << thing[i] << ", ";
-//                }
-//                cout << endl;
-//
-//                cout << "Nove. Fits: ";
-//                for (int i = 0; i < popsize; i++) {
-//                    cout << setw(2) << noveltyFits[i] << ", ";
-//                }
-//                cout << endl;
 
                 if ((BIGGER_BETTER && rptVals.first > runBestFit.first) ||
                     (!BIGGER_BETTER && rptVals.first < runBestFit.first)) {
@@ -124,8 +94,6 @@ int main(int argc, char *argv[]) {
                 if (gen == 2500000) {
                     sdaCheck(sdaFile, gen);
                 }
-
-                // TODO: Add dynamic mutation update.
             }
 
             if (gen < maxGens && gen % (int) (CULLING_EVERY * REPORT_EVERY) == 0 &&
